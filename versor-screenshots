@@ -1,0 +1,6 @@
+#!/bin/bash
+# sleep to let the user iconify the terminal window
+sleep 4
+echo > /tmp/commentary.txt
+emacs -q -l $COMMON/emacs/special-setups/just-versor/just-versor-setup.el -f take-screenshots &
+tail -f /tmp/commentary.txt

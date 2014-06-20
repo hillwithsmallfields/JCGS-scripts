@@ -1,0 +1,91 @@
+#!/bin/bash
+
+UNIT=Stone
+DATACOL=6
+TERMINAL=png
+SIZE=""
+DEBUG=false
+
+while true
+do
+  case $1 in
+      --st)     UNIT=Stone
+	        shift ;;
+      --kg)     UNIT=Kilograms
+	        shift ;;
+      --lb)     UNIT=Pounds
+	        shift ;;
+      --output) OUTPUTOVERRIDE=$2
+	        shift 2 ;;
+      --prefix) OUTPREFIX=$2
+	        shift 2 ;;
+      --cairo)  TERMINAL=pngcairo
+	        shift ;;
+      --large)  SIZE="size 1280,960"
+                shift ;;
+      --huge)   SIZE="size 2560,1920"
+                shift ;;
+      --debug)  DEBUG=true
+	        shift ;;
+      *)        break ;;
+  esac
+done
+
+case $UNIT in
+    Stone)     DATACOL=6
+	       AVCOL=10
+	       DIFFCOL=13
+	       # DIFFRANGE="[-5:5]"
+	       DIFFUNIT="Pounds"
+	       ;;
+    Pounds)    DATACOL=5
+	       AVCOL=9
+	       DIFFCOL=13
+	       # DIFFRANGE="[-5:5]"
+	       DIFFUNIT="Pounds"
+	       ;;
+    Kilograms) DATACOL=7
+	       AVCOL=12
+	       DIFFCOL=14
+	       DIFFUNIT="Kg"
+	       ;;
+esac
+
+INFILE=${1-$COMMON/health/weight.csv}
+TMPSCRIPT=/tmp/plot-weight.gnu
+TMPDATA=/tmp/plot-weight.dat
+STARTDATE=`tail -n+2 $INFILE | head -1 | sed s/,.*//`
+ENDDATE=`tail -1 $INFILE  | sed s/,.*//`
+STARTYEAR=`echo $STARTDATE | sed -e "s:[-/].*::"`
+ENDYEAR=`echo $ENDDATE | sed -e "s:[-/].*::"`
+OUTFILE=${OUTPUTOVERRIDE-/tmp/${OUTPREFIX}weight-$UNIT-$STARTYEAR-$ENDYEAR.png}
+
+if $DEBUG
+then
+  echo STARTDATE is $STARTDATE, ENDDATE is $ENDDATE, STARTYEAR is $STARTYEAR, ENDYEAR is $ENDYEAR
+  echo Plotting daily data in $UNIT from column $DATACOL of $TMPDATA, seven-day average in $UNIT from column $AVCOL, and deltas in $DIFFUNIT from column $DIFFCOL
+fi
+
+tail -n+2 < $INFILE | grep -v "0,0,0" | sed -e "s:/:-:g" > $TMPDATA
+# cp $INFILE $TMPDATA
+
+cat > $TMPSCRIPT <<EOF
+set title "My weight, $STARTYEAR-$ENDYEAR"
+set terminal $TERMINAL $SIZE
+set output "$OUTFILE"
+set timefmt x "%Y-%m-%d"
+set xdata time
+set format x "%Y-%m"
+# set xrange [ "$STARTDATE":"$ENDDATE" ]
+set xtics rotate by 45 border offset 0,.5 out nomirror 2419200
+set ylabel "$UNIT"
+set y2label "$DIFFUNIT change in week"
+set ytics nomirror
+set y2tics
+set grid xtics
+set datafile separator "," 
+plot "$TMPDATA" using 1:$DATACOL with line axes x1y1 lc 7 title "Weight", "$TMPDATA" using 1:$AVCOL with line axes x1y1 lc 1 title "Average (week)", "$TMPDATA" using 1:$DIFFCOL with line axes x1y2 lc 3 title "Change (average) in week"
+EOF
+
+gnuplot $TMPSCRIPT
+echo Chart is in $OUTFILE

@@ -1,0 +1,2 @@
+#!/bin/bash
+find $* -name "*.jpg" -exec $DROPBOX/com/photodate {} \; | grep original | sed -s "s/Date and Time (original)	//" | sort

@@ -1,0 +1,14 @@
+#! /bin/sh
+purge $COMMON/www
+cd $COMMON/www
+tar cvfz $COMMON/www.taz *
+ls -l $COMMON/www.taz
+mv $COMMON/www.taz $COMMON/www/www.taz
+ls -l $COMMON/www/www.taz
+cd $HOME
+ls -l $COMMON/www/www.taz
+echo Copying to server
+tocb1 $COMMON/www/www.taz
+rm $COMMON/www/www.taz
+echo Logging in to server to run wwwunpack
+ssh -l john.cb1.com www.cb1.com bin/wwwunpack

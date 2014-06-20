@@ -1,0 +1,16 @@
+#!/bin/bash
+# Script to install stuff from John Sturdy's configuration directory on Dropbox
+
+COMMON=$HOME/common
+CONFIG=$HOME/Dropbox/config
+
+for FILE in bash_profile ratpoisonrc emacs crontab oglerc signature xinitrc
+do
+  cp $CONFIG/$FILE ~/.$FILE
+done
+
+# if (which dpkg | grep -q dpkg )
+# then
+#   dpkg --set-selections < $COMMON/config/dpkg-selections
+#   # todo: something to actually do the installations
+# fi

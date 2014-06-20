@@ -1,0 +1,84 @@
+#! /bin/sh
+TMP=/tmp/genlogo$$
+
+FONT=Quintura
+TEXT=jcgs
+COLOUR=black
+SIZE=36
+
+while true
+do
+  case $1 in
+    -text)      TEXT=$2
+                shift 2
+                ;;
+    -font)      FONT=$2
+                shift 2
+                ;;
+    -size)      SIZE=$2
+                shift 2
+                ;;
+    -colour)    COLOUR=$2
+                shift 2
+                ;;
+      *)        break
+                ;;
+  esac
+done
+
+case $COLOUR in
+black) SETCOLOR="0 setgray";;
+red)   SETCOLOR="1 0 0 setrgbcolor";;
+green) SETCOLOR="0 1 0 setrgbcolor";;
+blue)  SETCOLOR="0 0 1 setrgbcolor";;
+esac
+
+cat <<EOPS > $TMP
+(/nfs/disk107/jcgs/psfonts/$FONT) run
+/$FONT findfont $SIZE scalefont setfont
+0 0 moveto
+$SETCOLOR
+($TEXT)
+dup  true charpath
+pathbbox % l b r t
+exch     % l b t r
+4 -1 roll % b t r l
+sub       % b t w
+3 1 roll  % w b t
+exch sub  % w h
+(-g) print
+exch cvi 1 add 20 string cvs print
+(x) print
+cvi 1 add 20 string cvs print (
+) print
+newpath 0 0 moveto
+pstack
+show
+showpage
+quit
+EOPS
+
+TIFFSIZE=`gs -sDEVICE=bbox - < $TMP | grep -F -e "-g"`
+
+OUTNAME=$HOME/tmp/$TEXT-$COLOUR-$FONT
+
+TIFFNAME=${OUTNAME}0.tiff
+RAWGIFNAME=${OUTNAME}0.gif
+GIFNAME=${OUTNAME}.gif
+gs -sDEVICE=tiff24nc $TIFFSIZE -sOutputFile=$TIFFNAME - < $TMP
+
+echo Please crop, and save as GIF into $RAWGIFNAME
+
+xv $TIFFNAME
+
+TRANSOUT=/tmp/transout
+
+# how do we get stderr in sh?
+giftrans -l -e $TRANSOUT $RAWGIFNAME
+WHITESTR=`grep -i white $TRANSOUT | sed -e "s/Color //" -e "s/:.*//"`
+
+giftrans -t$WHITESTR $RAWGIFNAME > $GIFNAME
+
+rm $TRANSOUT
+
+echo Result is in $GIFNAME

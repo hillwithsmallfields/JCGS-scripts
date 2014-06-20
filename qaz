@@ -1,0 +1,4 @@
+#!/bin/bash
+echo Switching back to qwerty
+echo Use command colemak to switch back to colemak
+setxkbmap us

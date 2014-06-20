@@ -1,0 +1,4 @@
+#! /bin/sh
+# fromcb1 -- scp from same file on cb1
+FILE=$1
+scp john@wwwold.cb1.com:$1 $1

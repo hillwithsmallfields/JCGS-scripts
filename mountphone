@@ -1,0 +1,2 @@
+#!/bin/bash
+sudo mount -o rw,uid=$USER ${1-/dev/sdc1} /mnt/phone-mmc/

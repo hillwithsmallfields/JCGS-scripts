@@ -1,0 +1,30 @@
+#! /bin/sh
+# re-tar web files as needed
+
+WEB=$HOME/common/www
+
+cd $WEB
+
+OUTGOING=$WEB/transfer
+touch $OUTGOING/something # make sure there is a match
+rm -f $OUTGOING/*
+echo "# Updates generated at " `date` > $OUTGOING/updates
+
+for ZIPBALL in $WEB/*.tar.gz
+do
+  DIRNAME=`basename $ZIPBALL .tar.gz`
+  find $WEB/$DIRNAME -name "*~" -or -name "*.old-tail" -exec rm {} \;
+  SIZEFILE=$WEB/$DIRNAME.changed
+  find $WEB/$DIRNAME -newer $ZIPBALL -print > $SIZEFILE
+  if test -s $SIZEFILE
+  then
+    echo some have changed in $DIRNAME
+    tar cf $DIRNAME.tar $DIRNAME
+    mv -f $WEB/$DIRNAME.tar.gz $WEB/oldtargz/$DIRNAME.tar.gz
+    gzip -f $DIRNAME.tar
+    cp $DIRNAME.tar.gz $WEB/outgoing/
+    echo "zcat $DIRNAME.tar.gz | tar xvf -" >> $OUTGOING/updates
+  else
+    echo none have changed in $DIRNAME
+  fi
+done

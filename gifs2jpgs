@@ -1,0 +1,7 @@
+#! /bin/bash
+
+for GIF in *.gif
+do
+  BASE=`basename $GIF .gif`
+  convert $GIF $BASE.jpeg
+done

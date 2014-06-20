@@ -1,0 +1,7 @@
+#!/bin/bash
+# snapshot -- script to take a snapshot of the directory in $1 naming it $2
+# Time-stamp: <2011-05-10 18:20:37 johnstu>
+DIR=$1
+NAME=$2
+cd $DIR/git
+guilt new -f $2

@@ -1,0 +1,10 @@
+#!/bin/bash
+cd $HOME/messing/mapping
+mv today.png yesterday.png
+wget http://download.geofabrik.de/osm/europe/great_britain/england/cambridgeshire.osm.bz2
+bunzip2 -f cambridgeshire.osm.bz2
+./Maperitive.sh Scripts/cambx.mscript
+IMGBASE=dated-images/cambridgeshire-`date +%Y%m%d`
+cp today.png $IMGBASE.png
+convert $IMGBASE.png $IMGBASE.gif
+gifsicle --colors 256 --delay=100 --loop dated-images/*.gif > loop.gif

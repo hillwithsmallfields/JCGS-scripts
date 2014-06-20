@@ -1,0 +1,4 @@
+#!/bin/bash
+vorbiscomment -l $1 > /tmp/old-comment
+sed -e s/\"//g < /tmp/old-comment > /tmp/new-comment
+vorbiscomment -w -c /tmp/new-comment $1

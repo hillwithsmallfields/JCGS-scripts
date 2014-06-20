@@ -1,0 +1,10 @@
+#!/bin/bash
+STAGINGTOP=$HOME/raw-photos
+LATEST=`ls -t ${STAGINGTOP}/*/*/p*.jpg | head -1`
+DATE=`date "+%Y/%Y-%m-%d"`
+STAGING=${STAGINGTOP}/$DATE
+echo Putting pictures more recent than $LATEST in $STAGING
+mkdir -p $STAGING
+CAMERA=${1-/mnt/camera/dcim}
+find $CAMERA -newer $LATEST -exec cp -p {} $STAGING \;
+

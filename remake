@@ -1,0 +1,8 @@
+#!/bin/bash
+make distclean
+autoheader
+autoconf
+automake
+./configure
+make && sudo make install
+make TAGS

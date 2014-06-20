@@ -1,0 +1,4 @@
+#!/bin/bash
+echo Switching to colemak
+echo Use command qaz which is same on both layouts to switch back
+setxkbmap us -variant colemak

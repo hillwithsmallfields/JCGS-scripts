@@ -1,0 +1,7 @@
+#! /bin/sh
+cd $EMACS
+etags *.el */*.el */*/*.el
+cd $GATHERED/emacs
+etags */*.el */*/*.el */*/*/*.el
+cd $HOME/open-projects
+etags */*.el */*/*.el */*/*/*.el

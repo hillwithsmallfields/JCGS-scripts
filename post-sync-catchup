@@ -1,0 +1,5 @@
+#!/bin/bash
+if (ps | grep emacs)
+then
+  emacsclient -e "(post-sync-catchup)"
+fi

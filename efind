@@ -1,0 +1,2 @@
+#! /bin/sh
+find $EMACS $GATHERED/emacs ${OPEN_PROJECTS} -name "*.el" -exec grep $* {} \;

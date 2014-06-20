@@ -1,0 +1,3 @@
+#!/bin/bash
+
+emacs -q -l $COMMON/emacs/special-setups/just-versor/just-versor-setup.el

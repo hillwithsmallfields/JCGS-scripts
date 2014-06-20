@@ -1,0 +1,13 @@
+#! /bin/sh
+cd $HOME/common/emacs
+etags *.el */*.el */*/*.el */*/*/*.el
+for DIR in Ringing/elisp Ringing/dove-elisp
+do
+  cd $HOME/$DIR
+  etags *.el
+done
+for DIR in webbery/w5/cgi-bin
+do
+  cd $HOME/$DIR
+  etags *.c *.h
+done

@@ -1,0 +1,2 @@
+#!/bin/bash
+emacs -q -l $EMACS/special-setups/tasks/tasks-emacs-setup.el

@@ -1,0 +1,28 @@
+#!/bin/bash
+# Make a timed tar archive of a directory
+# Usage: tarc [-bz2 | -j] [-q] directory
+
+LIST=true
+TAROPTS=czf
+EXTENSION=tgz
+TARPIT=.
+
+case $1 in
+     -q)  LIST=false
+          shift ;;
+    -bz2)
+    -j)   EXTENSION=.tg2
+          TAROPTS=cjf
+	  shift ;;
+    -d)   TARPIT=$2
+	  shift 2;;
+     *)
+esac
+
+DIRNAME=$1
+ARCNAME=${TARPIT}/${DIRNAME}-$(date +%F_%H-%M-%S).$EXTENSION
+tar $TAROPTS $ARCNAME $DIRNAME
+if $LIST
+then
+  ls -l $ARCNAME
+fi

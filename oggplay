@@ -1,0 +1,2 @@
+#!/bin/bash
+ogg123 -o dev:plughw:1,0 $*

@@ -1,0 +1,95 @@
+#! /bin/sh
+# Time-stamp: <2006-05-30 10:37:33 john>
+
+BACKGROUNDS=$HOME/backgrounds
+#EXTENSION=.gif
+EXTENSION=.xbm
+ROLLING=false;
+LISTING=false;
+ONCEONLY=true;
+DATALISTING=false;
+MKDB=false;
+RANDOM=false;
+DELAY=5
+
+case $1 in
+-l) LISTING=true ; shift ;;
+-ld) LISTING=true ; DATALISTING=true ; shift ;;
+-db) MKDB=true; shift ;;
+-a) ROLLING=true ; shift ;;
+-t) ROLLING=true ; DELAY=$2 ; ONCEONLY=false ; shift 2 ;;
+-r) RANDOM=true ; shift ;;
+ *) LISTING=false ;;
+esac
+
+if $ROLLING
+then
+  while true
+  do
+    for BG in $BACKGROUNDS/*$EXTENSION
+    do
+       xsetroot -bitmap $BG
+       sleep $DELAY
+    done
+    if $ONCEONLY
+    then
+      exit
+    fi
+  done
+  exit
+fi
+
+if $LISTING
+then
+
+  for BG in $BACKGROUNDS/*$EXTENSION
+  do
+    if $DATALISTING
+    then
+      echo %
+    fi
+    basename $BG $EXTENSION
+  done
+
+  exit
+fi
+
+if $RANDOM
+then
+  wp `fortune $BACKGROUNDS/bgs`
+  exit 0
+fi
+
+if $MKDB
+then
+  wp -ld > $BACKGROUNDS/bgs
+  strfile $BACKGROUNDS/bgs
+  exit 0
+fi
+
+BACKNAME=$1
+BACKGROUND=$1
+
+case $BACKGROUND in
+    *$EXTENSION) ;;
+    *) BACKGROUND=$BACKGROUND$EXTENSION ;;
+esac
+
+case $BACKGROUND in
+*/*) ;;
+  *) BACKGROUND=$BACKGROUNDS/$BACKGROUND ;;
+esac
+
+if [ -f $BACKGROUND ]
+then
+  xsetroot -bitmap $BACKGROUND
+else
+  POSSIBLE=`ls -1 $BACKGROUNDS | grep -i $BACKNAME | tail`
+  if [ -f $BACKGROUNDS/$POSSIBLE ]
+  then
+    wp $POSSIBLE
+  else
+    echo No matches
+  fi
+fi
+

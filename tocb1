@@ -1,0 +1,9 @@
+#! /bin/sh
+# tocb1 -- scp to same file on cb1
+cd $HOME
+FROMFILE=$1
+FROMFILE=`echo $FROMFILE | sed "s:^$HOME/::"`
+TOFILE=`echo $FROMFILE | sed "s:^Dropbox/www:Sites:" | sed "s:^common/emacs:Sites/computing/emacs/lisp:"`
+echo SCP from $FROMFILE to $TOFILE
+scp -P 20022 $FROMFILE john.cb1.com@www.cb1.com:$TOFILE
+# scp $FROMFILE john.cb1.com@www.cb1.com:$TOFILE

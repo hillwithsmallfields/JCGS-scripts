@@ -1,0 +1,8 @@
+#!/bin/bash
+YEAR=`date +%Y`
+SMALLER=$DROPBOX/health/weight-Stone-2012-$YEAR.png
+LARGER=$DROPBOX/health/weight-Stone-2012-$YEAR-huge.png
+gnumeric $DROPBOX/health/$YEAR.gnumeric $DROPBOX/health/recent.csv
+plot-weight --output $SMALLER --large --st $DROPBOX/health/recent.csv
+plot-weight --output $LARGER --huge --st $DROPBOX/health/recent.csv
+eog $SMALLER $LARGER

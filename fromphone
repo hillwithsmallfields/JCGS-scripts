@@ -1,0 +1,48 @@
+#!/bin/bash
+
+PHONE=${1-/mnt/phone-mmc}
+
+PARTITION_SETUP=false
+UNMOUNT=false
+
+while true
+do
+    case $PHONE in
+	-p)       PARTITION_SETUP=true
+	          shift ;;
+	/mnt/*)   break ;;
+	/media/*) break ;;
+	/dev/*)   if $PARTITION_SETUP
+		  then
+		      sudo parted $PHONE print
+		  fi
+		  sudo mount -o uid=$USER $PHONE /mnt/phone-mmc
+		  PHONE=/mnt/phone-mmc
+		  UNMOUNT=true
+		  break ;;
+    esac
+done
+
+COMMON=$HOME/common
+PRIVATE=/mnt/crypted
+
+case `hostname` in
+  blasket) ;;
+  *)          cp -rupv $PHONE/finances $HOME ;;
+esac
+
+cp -upv $PHONE/Dropbox/vehicles/Marmalade/*.org $PHONE/Dropbox/vehicles/Marmalade/*.gnumeric $VEHICLES/Marmalade
+cp -upv $PHONE/Dropbox/Categorical_Imperative/*.org $PHONE/Dropbox/Categorical_Imperative/*.gnumeric $DROPBOX/Categorical_Imperative
+cp -upv $PHONE/Dropbox/org/diary $DROPBOX/org/diary
+cp -upv $PHONE/Dropbox/org/*.org $ORG
+cp -upv $PHONE/Dropbox/languages/languages.deck $DROPBOX/languages
+cp -upv $PHONE/Dropbox/health/*.gnumeric $DROPBOX/health
+if [ -d $PRIVATE/personal/journal ]
+then
+  cp -upv $PHONE/common/tmp/for-diary $PRIVATE/personal/journal/dates/for-diary
+fi
+
+if $UNMOUNT
+then
+    sudo umount $PHONE
+fi

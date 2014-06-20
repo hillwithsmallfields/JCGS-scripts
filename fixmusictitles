@@ -1,0 +1,18 @@
+#!/bin/bash
+DIRECTORY=$1
+GENRE=$2
+ARTIST=$3
+ALBUM=`echo $DIRECTORY | sed -e "s/_/ /g" -e "s:/::g"`
+
+for FILE in $DIRECTORY/*.ogg
+do
+  BASE=`basename $FILE .ogg`
+  NUMBER=`echo $BASE | sed -r -e "s/-.+//"`
+  TRACK=`echo $BASE | sed -r -e "s/^[0-9]+-//" -e "s/_/ /g"`
+  echo "ALBUM=$ALBUM" > /tmp/oggcomment
+  echo "TRACKNUMBER=$NUMBER" >> /tmp/oggcomment
+  echo "TITLE=$TRACK" >> /tmp/oggcomment
+  echo "GENRE=$GENRE" >> /tmp/oggcomment
+  echo "ARTIST=$ARTIST" >> /tmp/oggcomment
+  vorbiscomment -w -c /tmp/oggcomment  $FILE
+done

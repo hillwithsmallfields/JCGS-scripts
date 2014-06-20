@@ -1,0 +1,2 @@
+#!/bin/bash
+emacs -q -l $EMACS/special-setups/journal/journal-emacs-setup.el
