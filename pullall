@@ -1,6 +1,9 @@
 #!/bin/bash
+
 for GITDIR in $EMACS $CONFIG $SCRIPTS
 do
   cd $GITDIR
   git pull
 done
+
+$SCRIPTS/afterpull
