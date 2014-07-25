@@ -1,0 +1,11 @@
+#!/bin/bash
+
+for FILE in bash_profile ratpoisonrc emacs crontab signature xinitrc
+do
+  TARGET=~/.$FILE
+  if [ -f $TARGET ]
+  then
+    cp $TARGET ${TARGET}-old
+  fi
+  cp $CONFIG/$FILE $TARGET
+done
