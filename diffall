@@ -1,7 +1,7 @@
 #!/bin/bash
 for GITDIR in $EMACS $CONFIG $SCRIPTS
 do
-  echo Pushing $GITDIR
+  echo Diffing $GITDIR
   cd $GITDIR
-  git push
+  git diff
 done
