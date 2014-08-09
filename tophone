@@ -28,6 +28,7 @@ PRIVATE=/mnt/crypted
 
 cp -rupv $HOME/finances $PHONE
 # rsync -av $COMMON/
+cp -upv $VEHICLES/Marmalade/*.org $VEHICLES/Marmalade/*.gnumeric $PHONE/Dropbox/vehicles/Marmalade/
 cp -upv $DROPBOX/Categorical_Imperative/*.org $DROPBOX/Categorical_Imperative/*.gnumeric $PHONE/Dropbox/Categorical_Imperative
 cp -upv $DROPBOX/org/diary $PHONE/Dropbox/org/diary
 cp -upv $ORG/*.org $PHONE/Dropbox/org
