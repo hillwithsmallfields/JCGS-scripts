@@ -1,11 +1,15 @@
 #!/bin/bash
 
+cd $CONFIG
+echo Copying config from $CONFIG into dotfiles
 for FILE in bash_profile ratpoisonrc emacs crontab signature xinitrc
 do
   TARGET=~/.$FILE
   if [ -f $TARGET ]
   then
-    cp $TARGET ${TARGET}-old
+    OLDTARGET=${TARGET}-old
+    echo Saving old $TARGET as $OLDTARGET
+    cp $TARGET $OLDTARGET
   fi
-  cp $CONFIG/$FILE $TARGET
+  cp -uv $CONFIG/$FILE $TARGET
 done

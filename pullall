@@ -3,6 +3,7 @@
 for GITDIR in $EMACS $CONFIG $SCRIPTS
 do
   cd $GITDIR
+  echo Pulling $GITDIR
   git pull
 done
 
