@@ -1,0 +1,3 @@
+#!/bin/bash
+# script to "kill matching"
+ps ax | grep $1 | grep -v grep | cut -d " " -f 1
