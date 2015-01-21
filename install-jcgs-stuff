@@ -1,8 +1,11 @@
 #!/bin/bash
 # Script to install stuff from John Sturdy's configuration directory on Dropbox
-
-COMMON=$HOME/common
-CONFIG=$HOME/Dropbox/config
+if [ -d /work/johstu01 ]
+then
+    EHOME=/work/johstu01
+fi
+COMMON=$EHOME/common
+CONFIG=$EHOME/JCGS-config
 
 for FILE in bash_profile ratpoisonrc emacs crontab oglerc signature xinitrc
 do
