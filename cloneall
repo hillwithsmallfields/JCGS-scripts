@@ -1,0 +1,31 @@
+#!/bin/bash
+
+GITHUBBASE=https://github.com/hillwithsmallfields
+
+for REPO in wearables elisp-cad zorg-mode cnc-things natlangfun
+do
+    GITDIR=$OPEN_PROJECTS/$REPO
+    ORIGIN=$GITHUBBASE/$REPO.git
+    if [ ! -d $GITDIR ]
+    then
+	cd $OPEN_PROJECTS
+	echo Cloning $ORIGIN into $GITDIR
+	git clone $ORIGIN
+    else
+	echo Skipping $GITDIR as it already exists
+    fi
+done
+
+for REPO in JCGS-scripts JCGS-config JCGS-emacs
+do
+    GITDIR=$EHOME/$REPO
+    ORIGIN=$GITHUBBASE/$REPO.git
+    if [ ! -d $GITDIR ]
+    then
+	cd $EHOME
+	echo Cloning $ORIGIN into $GITDIR
+	git clone $ORIGIN
+    else
+	echo Skipping $GITDIR as it already exists
+    fi
+done
