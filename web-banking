@@ -1,0 +1,2 @@
+#!/bin/bash
+epiphany-browser ~/Dropbox/local-www/banking-index.html &
