@@ -1,0 +1,12 @@
+#!/bin/bash
+# Usual things to start, that aren't quite predictable enough to start automatically
+HOST=`hostname`
+case $HOST in
+  isaiah) setxkbmap us
+          .dropbox-dist/dropboxd &
+          firefox &
+          pullall
+	  ;;
+  *)      echo No usual setup known for this host
+          ;;
+esac
