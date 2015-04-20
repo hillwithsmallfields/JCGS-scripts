@@ -7,7 +7,7 @@ case $HOST in
 	  echo -n "Time now "
 	  date
 	  read -p "Shut down at: " SHUTDOWNTIME
-	  sudo shutdown -h -P $SHUTDOWNTIME
+	  sudo shutdown -h -P $SHUTDOWNTIME &
           firefox &
           pullall
 	  ;;
