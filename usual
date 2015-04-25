@@ -4,7 +4,7 @@ HOST=`hostname`
 case $HOST in
   isaiah) setxkbmap us
           .dropbox-dist/dropboxd &
-	  echo -n "Time now "
+	  sudo echo -n "Time now "
 	  date
 	  read -p "Shut down at: " SHUTDOWNTIME
 	  sudo /sbin/shutdown -h -P $SHUTDOWNTIME &
