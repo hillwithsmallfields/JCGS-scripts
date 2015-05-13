@@ -1,0 +1,6 @@
+#!/bin/bash
+# Pop up a random photo from my background collection, on my browser.
+# Useful for browsing while waiting for a slow command to complete,
+# e.g. "make; rp"
+DEFAULTPICS=$EHOME/backgrounds
+firefox file:`ls -1 ${1-$DEFAULTPICS}/*.jpg | shuf | head -1`
