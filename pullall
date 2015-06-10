@@ -1,6 +1,6 @@
 #!/bin/bash
 
-for GITDIR in $EMACS $CONFIG $SCRIPTS $OPEN_PROJECTS/wearables $OPEN_PROJECTS/elisp-cad $OPEN_PROJECTS/zorg-mode $OPEN_PROJECTS/cnc-things $OPEN_PROJECTS/natlangfun $OPEN_PROJECTS/photo-handling
+for GITDIR in $EMACS $CONFIG $SCRIPTS $OPEN_PROJECTS/wearables $OPEN_PROJECTS/elisp-cad $OPEN_PROJECTS/zorg-mode $OPEN_PROJECTS/cnc-things $OPEN_PROJECTS/natlangfun $OPEN_PROJECTS/mvphotos
 do
     if [ -d $GITDIR ]
     then
