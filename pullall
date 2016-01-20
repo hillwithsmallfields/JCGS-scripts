@@ -8,7 +8,9 @@ do
 	echo Pulling $GITDIR
 	git pull
     else
-	echo Skipping $GITDIR as it does not exist
+	PROJECT=`basename $GITDIR`
+	echo "Skipping $GITDIR (for project $PROJECT) as it does not exist"
+	echo Try git clone https://github.com/hillwithsmallfields/$PROJECT.git
     fi
 done
 
