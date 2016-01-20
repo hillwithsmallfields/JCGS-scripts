@@ -2,7 +2,7 @@
 
 cd $CONFIG
 echo Copying config from $CONFIG into dotfiles
-for FILE in bash_profile ratpoisonrc emacs crontab signature xinitrc
+for FILE in bash_profile bashrc ratpoisonrc emacs crontab signature xinitrc
 do
   TARGET=~/.$FILE
   if [ -f $TARGET ]
