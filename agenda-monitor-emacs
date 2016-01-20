@@ -1,2 +1,6 @@
 #!/bin/bash
+if [ ! -v EMACS ]
+then
+    . $HOME/.bash_profile
+fi
 emacs -q -l $EMACS/special-setups/tasks/tasks-emacs-setup.el -f jcgs/org-agenda-monitor-start
