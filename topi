@@ -1,14 +1,14 @@
 #!/bin/bash
-DIRECTORIES=common open-projects Dropbox library
+DIRECTORIES="common open-projects Dropbox library"
 SERVER=whinberry
-SERVERMOUNT=/nfs/whinberry/usbmem
+SERVERMOUNT=/nfs/whinberry
 for DIR in $DIRECTORIES
 do
     echo Updating $DIR on $SERVER
     LOCALDIR=${EHOME-${HOME}}/$DIR
     if [ -d $SERVERMOUNT/$DIR ]
     then
-	cp -rp $LOCALDIR
+	cp -rp $LOCALDIR $SERVERMOUNT
     else
 	rsync -a $LOCALDIR/ $USER@$SERVER:$SERVERMOUNT
     fi
