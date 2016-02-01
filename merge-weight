@@ -1,0 +1,35 @@
+#!/usr/bin/env python
+
+import csv
+import sys
+
+def merge_weight(accu, newpoints):
+    with open(accu, 'rb') as accumulated:
+        field_names = filter(lambda x: x,
+                             map(lambda y: y.strip('"'),
+                                 accumulated.readline().split(",")[:-1]))
+        print "field names are", field_names
+        field_names = field_names + ['']
+        accumulated.seek(0)
+        reader = csv.DictReader(accumulated)
+        by_dates = {}
+        for row in reader:
+            by_dates[row['Date']] = row
+        with open(newpoints, 'rb') as incoming:
+            inreader = csv.reader(incoming)
+            for inrow in inreader:
+                if len(inrow) > 0:
+                    indate = inrow[1][0:10].replace('-', '/')
+                    inkilos = inrow[0]
+                    incomment = inrow[2]
+                    print "inrow is", inrow, "and indate is", indate, "and inkilos is", inkilos, "and incomment is", incomment
+                    # todo: convert kilos to lbs, st and lbs, then merge the row in
+        with open("merged.csv", 'w') as output_file:
+            writer = csv.DictWriter(output_file, fieldnames=field_names)
+            writer.writeheader()
+            for date in sorted(by_dates.keys()):
+                writer.writerow(by_dates[date])
+
+if __name__ == '__main__':
+    merge_weight(sys.argv[1], sys.argv[2])
+    
