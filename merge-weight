@@ -2,8 +2,9 @@
 
 import csv
 import sys
+import datetime
 
-def merge_weight(accu, newpoints):
+def merge_weight(accu, newpoints, output):
     with open(accu, 'rb') as accumulated:
         field_names = filter(lambda x: x,
                              map(lambda y: y.strip('"'),
@@ -13,34 +14,57 @@ def merge_weight(accu, newpoints):
         accumulated.seek(0)
         reader = csv.DictReader(accumulated)
         by_dates = {}
+        pounds_by_date_numbers = {}
+        kilos_by_date_numbers = {}
+        epoch = datetime.datetime.strptime("1899/12/31", "%Y/%m/%d")
         for row in reader:
             by_dates[row['Date']] = row
         with open(newpoints, 'rb') as incoming:
             inreader = csv.reader(incoming)
-            for inrow in inreader:
-                if len(inrow) > 0:
-                    in_date = inrow[1][0:10].replace('-', '/')
-                    in_kilos = inrow[0]
-                    in_comment = inrow[2]
+            for in_row in inreader:
+                if len(in_row) > 0:
+                    in_date = in_row[1][0:10].replace('-', '/')
+                    in_kilos = float(in_row[0])
+                    in_comment = in_row[2]
+                    date = datetime.datetime.strptime(in_date, "%Y/%m/%d") - epoch
+                    print "in_row is", in_row, "and in_date is", in_date, "which is", date, "and in_kilos is", in_kilos, "and in_comment is", in_comment
                     pounds = in_kilos * 2.20462
                     stone = pounds / 14
                     int_stone = int(stone)
                     pounds_over_stone = pounds % 14
-                    print "inrow is", inrow, "and indate is", indate, "and inkilos is", inkilos, "and incomment is", incomment
-                    row = by_dates.get(in_date, {'Date': in_date})
+                    row = by_dates.get(in_date, None)
+                    if row is None:
+                        row = {'Date': in_date}
+                        by_dates[in_date] = row
+                    row['Date number'] = date
                     row['Kg'] = in_kilos
                     row['Stone'] = int_stone
                     row['Lbs'] = pounds_over_stone
                     row['Lbs total'] = pounds
                     row['Non-zero'] = 1
-        with open("merged.csv", 'w') as output_file:
+                    pounds_by_date_numbers[date] = pounds
+                    kilos_by_date_numbers[date] = in_kilos
+        for date in sorted(by_dates.keys()):
+            row = by_dates[date]
+            date_number = row['Date number']
+            count = 0
+            total = row.get('Pounds', None)
+            if total is not None:
+                for i in range(1, 6):
+                    back_row = pounds_by_date_numbers.get(date_number - i, None)
+                    if back_row is not None:
+                        back_pounds = back_row.get('Pounds', None)
+                        if back_pounds is not None:
+                            count = count + 1
+                            total = total + back_pounds
+                row['Week avg lb'] = total / count
+        with open(output, 'w') as output_file:
             writer = csv.DictWriter(output_file, fieldnames=field_names)
             writer.writeheader()
             for date in sorted(by_dates.keys()):
-                # todo: calculate running averages
                 writer.writerow(by_dates[date])
 
 if __name__ == '__main__':
-    merge_weight(sys.argv[1], sys.argv[2])
+    merge_weight(sys.argv[1], sys.argv[2], sys.argv[3])
     
 # Date, Stone, Lbs, Date number, Lbs total, St total, Kg, Non-zero, Week avg lb, Week avg st, Week avg lb mod 14, Week avg Kg, Week avg diff lb, Week avg diff Kg, Week avg diff ratio, Percent lost in week, , Resting pulse, Peak flow (a.m.), Peak flow (p.m.), , Calories at gym, Swim, Plank, , Elapsed time, Travel time, Max speed, Average speed, Trip distance, , Run distance, Run time, Run average speed, , Waist, Chest, Left upper arm, Right upper arm, Left forearm, Right forearm, Left thigh, Right thigh, Left calf, Right calf, , Comment
