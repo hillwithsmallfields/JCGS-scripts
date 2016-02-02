@@ -19,17 +19,28 @@ def merge_weight(accu, newpoints):
             inreader = csv.reader(incoming)
             for inrow in inreader:
                 if len(inrow) > 0:
-                    indate = inrow[1][0:10].replace('-', '/')
-                    inkilos = inrow[0]
-                    incomment = inrow[2]
+                    in_date = inrow[1][0:10].replace('-', '/')
+                    in_kilos = inrow[0]
+                    in_comment = inrow[2]
+                    pounds = in_kilos * 2.20462
+                    stone = pounds / 14
+                    int_stone = int(stone)
+                    pounds_over_stone = pounds % 14
                     print "inrow is", inrow, "and indate is", indate, "and inkilos is", inkilos, "and incomment is", incomment
-                    # todo: convert kilos to lbs, st and lbs, then merge the row in
+                    row = by_dates.get(in_date, {'Date': in_date})
+                    row['Kg'] = in_kilos
+                    row['Stone'] = int_stone
+                    row['Lbs'] = pounds_over_stone
+                    row['Lbs total'] = pounds
+                    row['Non-zero'] = 1
         with open("merged.csv", 'w') as output_file:
             writer = csv.DictWriter(output_file, fieldnames=field_names)
             writer.writeheader()
             for date in sorted(by_dates.keys()):
+                # todo: calculate running averages
                 writer.writerow(by_dates[date])
 
 if __name__ == '__main__':
     merge_weight(sys.argv[1], sys.argv[2])
     
+# Date, Stone, Lbs, Date number, Lbs total, St total, Kg, Non-zero, Week avg lb, Week avg st, Week avg lb mod 14, Week avg Kg, Week avg diff lb, Week avg diff Kg, Week avg diff ratio, Percent lost in week, , Resting pulse, Peak flow (a.m.), Peak flow (p.m.), , Calories at gym, Swim, Plank, , Elapsed time, Travel time, Max speed, Average speed, Trip distance, , Run distance, Run time, Run average speed, , Waist, Chest, Left upper arm, Right upper arm, Left forearm, Right forearm, Left thigh, Right thigh, Left calf, Right calf, , Comment
