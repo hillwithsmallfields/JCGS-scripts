@@ -1,15 +1,17 @@
 #!/bin/bash
-DIRECTORIES="common open-projects Dropbox library"
+DIRECTORIES="$EHOME/common/* $EHOME/open-projects/* $EHOME/Dropbox/* $EHOME/library"
 SERVER=whinberry
 SERVERMOUNT=/nfs/whinberry
+read -p "Password for $USER on $SERVER: " RSYNC_PASSWORD
+export RSYNC_PASSWORD
 for DIR in $DIRECTORIES
 do
-    echo Updating $DIR from $SERVER
-    LOCALDIR=${EHOME-${HOME}}/$DIR
-    if [ -d $SERVERMOUNT/$DIR ]
+    REMOTEDIR=`echo $DIR | sed s:$EHOME/::`
+    echo Updating $DIR from $REMOTEDIR on $SERVER
+    if [ -d "$SERVERMOUNT/$REMOTEDIR" ]
     then
-	cp -rp $SERVERMOUNT/$DIR $LOCALDIR
+	rsync -uavC $SERVERMOUNT/$REMOTEDIR/ $DIR
     else
-	rsync -a $USER@$SERVER:$SERVERMOUNT $LOCALDIR
+	rsync -uaCvz $USER@$SERVER:$SERVERMOUNT/$REMOTEDIR/ $DIR
     fi
 done
