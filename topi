@@ -1,9 +1,10 @@
 #!/bin/bash
 DIRECTORIES="$EHOME/common/* $EHOME/open-projects/* $EHOME/Dropbox/* $EHOME/library"
-SERVER=whinberry
+SERVER=${1-whinberry}
 SERVERMOUNT=/nfs/whinberry
-read -p "Password for $USER on $SERVER: " RSYNC_PASSWORD
-export RSYNC_PASSWORD
+SERVERDIR=/mnt/usbmem
+# read -p "Password for $SERVERUSER on $SERVER: " RSYNC_PASSWORD
+# export RSYNC_PASSWORD
 for DIR in $DIRECTORIES
 do
     REMOTEDIR=`echo $DIR | sed s:$EHOME/::`
@@ -12,6 +13,6 @@ do
     then
 	rsync -uavC $DIR/ $SERVERMOUNT/$REMOTEDIR
     else
-	rsync -uaCvz $DIR/ $USER@$SERVER:$SERVERMOUNT/$REMOTEDIR
+	rsync -uaCvz $DIR/ $SERVERUSER@$SERVER:$SERVERDIR/$REMOTEDIR
     fi
 done
