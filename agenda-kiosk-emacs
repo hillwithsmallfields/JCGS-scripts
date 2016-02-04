@@ -3,4 +3,7 @@ if [ ! -v EMACS ]
 then
     . $HOME/.bash_profile
 fi
-emacs -q -l $EMACS/special-setups/tasks/org-agenda-kiosk.el -f org-agenda-kiosk
+while [ ! -f /tmp/stop-agenda-kiosk ]
+do
+    emacs -q -l $EMACS/special-setups/tasks/org-agenda-kiosk.el -f org-agenda-kiosk
+done
