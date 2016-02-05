@@ -8,3 +8,4 @@ do
     emacs -q -l $EMACS/special-setups/tasks/org-agenda-kiosk.el -f org-agenda-kiosk
     rm -f /tmp/restart-agenda-kiosk
 done
+rm -f /tmp/stop-agenda-kiosk
