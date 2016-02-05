@@ -1,5 +1,5 @@
 #!/bin/bash
-DIRECTORIES="$EHOME/common/* $EHOME/open-projects/* $EHOME/Dropbox/* $EHOME/library"
+DIRECTORIES="$EHOME/common/* $EHOME/Dropbox/* $EHOME/library"
 SERVER=${1-$HOMESERVER}
 SERVERMOUNT=/nfs/whinberry
 SERVERDIR=/mnt/usbmem
