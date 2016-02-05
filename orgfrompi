@@ -1,0 +1,16 @@
+#!/bin/bash
+SERVER=${1-$HOMESERVER}
+SERVERMOUNT=/nfs/whinberry
+SERVERDIR=/mnt/usbmem
+DIR=$EHOME/Dropbox/org
+
+REMOTEDIR=`echo $DIR | sed s:$EHOME/::`
+if [ -d "$SERVERMOUNT/$REMOTEDIR" ]
+then
+    echo Updating $DIR from $SERVERMOUNT/$REMOTEDIR/ on $SERVER via nfs
+    rsync -uavC $SERVERMOUNT/$REMOTEDIR/ $DIR
+else
+    echo Updating $DIR from $SERVERUSER@$SERVER:$SERVERDIR/$REMOTEDIR/ on $SERVER via ssh
+    rsync -uaCvz $SERVERUSER@$SERVER:$SERVERDIR/$REMOTEDIR/ $DIR
+fi
+
