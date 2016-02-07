@@ -26,12 +26,12 @@ def merge_weight(accu, newpoints, output):
                     in_date = in_row[1][0:10].replace('-', '/')
                     in_kilos = float(in_row[0])
                     in_comment = in_row[2]
-                    date = datetime.datetime.strptime(in_date, "%Y/%m/%d") - epoch
+                    date = (datetime.datetime.strptime(in_date, "%Y/%m/%d") - epoch).days
                     print "in_row is", in_row, "and in_date is", in_date, "which is", date, "and in_kilos is", in_kilos, "and in_comment is", in_comment
                     pounds = in_kilos * 2.20462
                     stone = pounds / 14
                     int_stone = int(stone)
-                    pounds_over_stone = pounds % 14
+                    pounds_over_stone = int(pounds % 14)
                     row = by_dates.get(in_date, None)
                     if row is None:
                         row = {'Date': in_date}
@@ -40,7 +40,7 @@ def merge_weight(accu, newpoints, output):
                     row['Kg'] = in_kilos
                     row['Stone'] = int_stone
                     row['Lbs'] = pounds_over_stone
-                    row['Lbs total'] = pounds
+                    row['Lbs total'] = int(pounds)
                     row['Non-zero'] = 1
                     pounds_by_date_numbers[date] = pounds
                     kilos_by_date_numbers[date] = in_kilos
