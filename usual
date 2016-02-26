@@ -10,7 +10,8 @@ case $HOST in
 	  echo $SHUTDOWNTIME > /tmp/shutdowntime
 	  sudo /sbin/shutdown -h -P $SHUTDOWNTIME &
           firefox &
-          pullall
+          pullrepos
+	  orgfrompi
 	  ;;
   *)      echo No usual setup known for this host
           ;;
