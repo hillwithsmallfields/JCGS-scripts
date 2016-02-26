@@ -2,16 +2,16 @@
 # Usual things to start, that aren't quite predictable enough to start automatically
 HOST=`hostname`
 case $HOST in
-  isaiah) setxkbmap us
-          .dropbox-dist/dropboxd &
-	  sudo echo -n "Time now "
+  isaiah) sudo echo -n "Time now "
 	  date
 	  read -p "Shut down at: " SHUTDOWNTIME
 	  echo $SHUTDOWNTIME > /tmp/shutdowntime
 	  sudo /sbin/shutdown -h -P $SHUTDOWNTIME &
-          firefox &
+	  ssh-add
           pullrepos
 	  orgfrompi
+	  .dropbox-dist/dropboxd &
+          firefox &
 	  ;;
   *)      echo No usual setup known for this host
           ;;
