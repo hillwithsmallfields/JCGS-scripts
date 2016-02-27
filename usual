@@ -2,14 +2,12 @@
 # Usual things to start, that aren't quite predictable enough to start automatically
 HOST=`hostname`
 case $HOST in
-  isaiah) sudo echo -n "Time now "
-	  date
+  isaiah) sudo echo -n "Time now "; date
 	  read -p "Shut down at: " SHUTDOWNTIME
 	  echo $SHUTDOWNTIME > /tmp/shutdowntime
 	  sudo /sbin/shutdown -h -P $SHUTDOWNTIME &
-	  ssh-add
-          pullrepos
-	  orgfrompi
+	  ssh-add; pullrepos
+	  pullorg
 	  .dropbox-dist/dropboxd &
           firefox &
 	  ;;
