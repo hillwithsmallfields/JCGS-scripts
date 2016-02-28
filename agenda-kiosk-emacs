@@ -2,10 +2,10 @@
 
 # Run my Emacs agenda system in a "kiosk" style.
 #
-# This lets you move around the agenda tree using just a "numeric"
-# keypad.  I'm going to build a Raspberry Pi running this into a
-# noticeboard, so my "things to do" lists can live alongside real
-# paper notices about things.
+# This lets you move around the agenda tree, and mark things as done,
+# using just a "numeric" keypad.  I plan to build a Raspberry Pi
+# running this into a noticeboard, so my "things to do" lists can live
+# alongside real paper notices about things.
 #
 # The emacs part of this project is within
 # https://github.com/hillwithsmallfields/JCGS-emacs, and the cutouts
