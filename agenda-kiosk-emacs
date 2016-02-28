@@ -5,7 +5,7 @@ then
 fi
 while [ ! -f /tmp/stop-agenda-kiosk ]
 do
-    emacs -q -l $EMACS/special-setups/tasks/org-agenda-kiosk.el -f org-agenda-kiosk
+    emacs -q -l $EMACS/special-setups/tasks/org-agenda-kiosk.el -f jcgs/org-agenda-monitor-start -f org-agenda-kiosk
     rm -f /tmp/restart-agenda-kiosk
 done
 rm -f /tmp/stop-agenda-kiosk
