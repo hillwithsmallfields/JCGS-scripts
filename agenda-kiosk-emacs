@@ -1,11 +1,24 @@
 #!/bin/bash
+
+# Run my Emacs agenda system in a "kiosk" style.
+#
+# This lets you move around the agenda tree using just a "numeric"
+# keypad.  I'm going to build a Raspberry Pi running this into a
+# noticeboard, so my "things to do" lists can live alongside real
+# paper notices about things.
+#
+# The emacs part of this project is within
+# https://github.com/hillwithsmallfields/JCGS-emacs, and the cutouts
+# for screen and keypad in the noticeboard at
+# https://github.com/hillwithsmallfields/cnc-things/tree/master/notice-board
+
 if [ ! -v EMACS ]
 then
     . $HOME/.bash_profile
 fi
 while [ ! -f /tmp/stop-agenda-kiosk ]
 do
-    emacs -q -l $EMACS/special-setups/tasks/org-agenda-kiosk.el -f jcgs/org-agenda-monitor-start -f org-agenda-kiosk
+    emacs -q -l $EMACS/special-setups/tasks/org-agenda-kiosk.el -f org-agenda-kiosk
     rm -f /tmp/restart-agenda-kiosk
 done
 rm -f /tmp/stop-agenda-kiosk
