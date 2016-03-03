@@ -1,5 +1,5 @@
 #!/bin/bash
-DIRECTORIES="$EHOME/Dropbox/org $EHOME/Dropbox/vehicles/Marmalade"
+DIRECTORIES="$EHOME/common/org $EHOME/common/vehicles/Marmalade"
 SERVER=${1-$HOMESERVER}
 SERVERMOUNT=/nfs/whinberry
 SERVERDIR=/mnt/usbmem

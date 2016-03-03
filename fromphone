@@ -31,12 +31,12 @@ case `hostname` in
   *)          cp -rupv $PHONE/finances $HOME ;;
 esac
 
-cp -upv $PHONE/Dropbox/vehicles/Marmalade/*.org $PHONE/Dropbox/vehicles/Marmalade/*.gnumeric $VEHICLES/Marmalade
-cp -upv $PHONE/Dropbox/Categorical_Imperative/*.org $PHONE/Dropbox/Categorical_Imperative/*.gnumeric $DROPBOX/Categorical_Imperative
-cp -upv $PHONE/Dropbox/org/diary $DROPBOX/org/diary
-cp -upv $PHONE/Dropbox/org/*.org $ORG
-cp -upv $PHONE/Dropbox/languages/languages.deck $DROPBOX/languages
-cp -upv $PHONE/Dropbox/health/*.gnumeric $DROPBOX/health
+cp -upv $PHONE/common/vehicles/Marmalade/*.org $PHONE/common/vehicles/Marmalade/*.gnumeric $VEHICLES/Marmalade
+cp -upv $PHONE/common/Categorical_Imperative/*.org $PHONE/common/Categorical_Imperative/*.gnumeric $DROPBOX/Categorical_Imperative
+cp -upv $PHONE/common/org/diary $DROPBOX/org/diary
+cp -upv $PHONE/common/org/*.org $ORG
+cp -upv $PHONE/common/languages/languages.deck $DROPBOX/languages
+cp -upv $PHONE/common/health/*.gnumeric $DROPBOX/health
 if [ -d $PRIVATE/personal/journal ]
 then
   cp -upv $PHONE/common/tmp/for-diary $PRIVATE/personal/journal/dates/for-diary

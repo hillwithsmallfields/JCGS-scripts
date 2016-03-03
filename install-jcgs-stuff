@@ -1,5 +1,5 @@
 #!/bin/bash
-# Script to install stuff from John Sturdy's configuration directory on Dropbox
+# Script to install stuff from John Sturdy's configuration directory on his server
 if [ -d /work/johstu01 ]
 then
     EHOME=/work/johstu01

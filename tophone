@@ -28,12 +28,12 @@ PRIVATE=/mnt/crypted
 
 cp -rupv $HOME/finances $PHONE
 # rsync -av $COMMON/
-cp -upv $VEHICLES/Marmalade/*.org $VEHICLES/Marmalade/*.gnumeric $PHONE/Dropbox/vehicles/Marmalade/
-cp -upv $DROPBOX/Categorical_Imperative/*.org $DROPBOX/Categorical_Imperative/*.gnumeric $PHONE/Dropbox/Categorical_Imperative
-cp -upv $DROPBOX/org/diary $PHONE/Dropbox/org/diary
-cp -upv $ORG/*.org $PHONE/Dropbox/org
-cp -upv $DROPBOX/languages/languages.deck $PHONE/Dropbox/languages
-cp -upv $DROPBOX/health/*.gnumeric $PHONE/Dropbox/health/
+cp -upv $VEHICLES/Marmalade/*.org $VEHICLES/Marmalade/*.gnumeric $PHONE/common/vehicles/Marmalade/
+cp -upv $DROPBOX/Categorical_Imperative/*.org $DROPBOX/Categorical_Imperative/*.gnumeric $PHONE/common/Categorical_Imperative
+cp -upv $DROPBOX/org/diary $PHONE/common/org/diary
+cp -upv $ORG/*.org $PHONE/common/org
+cp -upv $DROPBOX/languages/languages.deck $PHONE/common/languages
+cp -upv $DROPBOX/health/*.gnumeric $PHONE/common/health/
 if [ -d $PRIVATE/personal/journal ]
 then
   cp -upv $PRIVATE/personal/journal/dates/for-diary $PHONE/common/tmp/for-diary
