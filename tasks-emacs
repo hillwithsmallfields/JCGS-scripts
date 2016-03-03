@@ -1,2 +1,19 @@
 #!/bin/bash
-emacs -q -l $EMACS/special-setups/tasks/tasks-emacs-setup.el $*
+if [ `hostname` != whinberry ]
+then
+    echo Pulling org files from server
+    pullorg
+fi
+if [ -x /usr/local/bin/emacs ]
+then
+    EMACSBIN=/usr/local/bin/emacs
+else
+    EMACSBIN=emacs
+fi
+echo Using $EMACSBIN as emacs
+$EMACSBIN -q -l $EMACS/special-setups/tasks/tasks-emacs-setup.el $*
+if [ `hostname` != whinberry ]
+then
+    echo Pushing org files from server
+    pushorg
+fi
