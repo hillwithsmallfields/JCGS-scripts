@@ -14,6 +14,6 @@ echo Using $EMACSBIN as emacs
 $EMACSBIN -q -l $EMACS/special-setups/tasks/tasks-emacs-setup.el $*
 if [ `hostname` != whinberry ]
 then
-    echo Pushing org files from server
+    echo Pushing org files to server
     pushorg
 fi
