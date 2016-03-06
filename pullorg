@@ -7,13 +7,16 @@ SERVERDIR=/mnt/usbmem
 # export RSYNC_PASSWORD
 for DIR in $DIRECTORIES
 do
-    REMOTEDIR=`echo $DIR | sed s:$EHOME/::`
-    if [ -d "$SERVERMOUNT/$REMOTEDIR" ]
+    if [ -d $DIR ]
     then
-	echo Updating $DIR from $SERVERMOUNT/$REMOTEDIR/ on $SERVER via nfs
-	rsync -uavC $SERVERMOUNT/$REMOTEDIR/ $DIR
-    else
-	echo Updating $DIR from $SERVERUSER@$SERVER:$SERVERDIR/$REMOTEDIR/ on $SERVER via ssh
-	rsync -uaCvz $SERVERUSER@$SERVER:$SERVERDIR/$REMOTEDIR/ $DIR
+	REMOTEDIR=`echo $DIR | sed s:$EHOME/::`
+	if [ -d "$SERVERMOUNT/$REMOTEDIR" ]
+	then
+	    echo Updating $DIR from $SERVERMOUNT/$REMOTEDIR/ on $SERVER via nfs
+	    rsync -uavC $SERVERMOUNT/$REMOTEDIR/ $DIR
+	else
+	    echo Updating $DIR from $SERVERUSER@$SERVER:$SERVERDIR/$REMOTEDIR/ on $SERVER via ssh
+	    rsync -uaCvz $SERVERUSER@$SERVER:$SERVERDIR/$REMOTEDIR/ $DIR
+	fi
     fi
 done
