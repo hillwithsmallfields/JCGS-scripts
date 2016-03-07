@@ -1,0 +1,5 @@
+#!/bin/bash
+SNAPSHOTS=$EHOME/org-snapshots
+DATE=`date "+%Y-%m-%d"`
+mkdir -p $SNAPSHOTS
+tar czf $SNAPSHOTS/$DATE.tgz $ORG $MYSELFORG
