@@ -1,2 +1,2 @@
 #!/bin/bash
-ssh jcgs@js64.twilightparadox.com
+ssh ${SERVERUSER-jcgs}@${HOMESERVER-js64.twilightparadox.com} $*
