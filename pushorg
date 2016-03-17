@@ -15,8 +15,8 @@ do
 	    echo Updating $DIR into $SERVERMOUNT/$REMOTEDIR on $SERVER via nfs
 	    rsync -uavC $DIR/ $SERVERMOUNT/$REMOTEDIR
 	else
-	    echo Updating $DIR into $SERVERUSER@$SERVER:$SERVERDIR/$REMOTEDIR on $SERVER via ssh
-	    rsync -uaCvz $DIR/ $SERVERUSER@$SERVER:$SERVERDIR/$REMOTEDIR
+	    echo Updating $DIR into $SERVERUSER@$SERVER:$HOMESERVERSSHPORT/$SERVERDIR/$REMOTEDIR on $SERVER via ssh
+	    rsync -uaCvz $fDIR/ $SERVERUSER@$SERVER:$HOMESERVERSSHPORT/$SERVERDIR/$REMOTEDIR
 	fi
     fi
 done
