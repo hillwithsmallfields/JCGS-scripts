@@ -12,11 +12,11 @@ do
 	REMOTEDIR=`echo $DIR | sed s:$EHOME/::`
 	if [ -d "$SERVERMOUNT/$REMOTEDIR" ]
 	then
-	    echo Updating $DIR from $SERVERMOUNT/$REMOTEDIR/ on $SERVER via nfs
-	    rsync -uavC $SERVERMOUNT/$REMOTEDIR/ $DIR
+	    echo Using: rsync -uavC $SERVERMOUNT/$REMOTEDIR $DIR
+	    rsync -uavC $SERVERMOUNT/$REMOTEDIR $DIR
 	else
-	    echo Updating $DIR from $SERVERUSER@$SERVER:$HOMESERVERSSHPORT/$SERVERDIR/$REMOTEDIR/ on $SERVER via ssh
-	    rsync -uaCvz $SERVERUSER@$SERVER:$HOMESERVERSSHPORT/$SERVERDIR/$REMOTEDIR/ $DIR
+	    echo Using: rsync -uaCvz -e "ssh -p $HOMESERVERSSHPORT" $SERVERUSER@$SERVER:$SERVERDIR/$REMOTEDIR/ $DIR
+	    rsync -uaCvz -e "ssh -p $HOMESERVERSSHPORT" $SERVERUSER@$SERVER:$SERVERDIR/$REMOTEDIR/ $DIR
 	fi
     fi
 done
