@@ -15,6 +15,7 @@ do
 	    echo Using: rsync -uavC $DIR/ $SERVERMOUNT/$REMOTEDIR
 	    rsync -uavC $DIR/ $SERVERMOUNT/$REMOTEDIR
 	else
+
 	    echo Using: rsync -uaCvz -e "ssh -p $HOMESERVERSSHPORT" $DIR/ $SERVERUSER@$SERVER:/$SERVERDIR/$REMOTEDIR
 	    rsync -uaCvz -e "ssh -p $HOMESERVERSSHPORT" $DIR/ $SERVERUSER@$SERVER:/$SERVERDIR/$REMOTEDIR
 	fi
