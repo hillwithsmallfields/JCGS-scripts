@@ -1,8 +1,17 @@
 #!/bin/bash
-if [ `hostname` != whinberry ]
+USE_SERVER=true
+case $1 in
+    --local) USE_SERVER=false
+	     shift ;;
+    *) break
+esac
+if $USE_SERVER
 then
-    echo Pulling org files from server
-    pullorg
+    if [ `hostname` != whinberry ]
+    then
+	echo Pulling org files from server
+	pullorg
+    fi
 fi
 if [ -x /usr/local/bin/emacs ]
 then
@@ -12,8 +21,11 @@ else
 fi
 echo Using $EMACSBIN as emacs
 $EMACSBIN -q -l $EMACS/special-setups/tasks/tasks-emacs-setup.el $*
-if [ `hostname` != whinberry ]
+if $USE_SERVER
 then
-    echo Pushing org files to server
-    pushorg
+    if [ `hostname` != whinberry ]
+    then
+	echo Pushing org files to server
+	pushorg
+    fi
 fi
