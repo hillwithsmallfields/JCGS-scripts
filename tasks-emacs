@@ -3,7 +3,7 @@ USE_SERVER=true
 case $1 in
     --local) USE_SERVER=false
 	     shift ;;
-    *) break
+    *)
 esac
 if $USE_SERVER
 then
