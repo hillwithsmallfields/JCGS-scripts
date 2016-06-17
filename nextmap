@@ -1,7 +1,7 @@
 #!/bin/bash
 cd $HOME/messing/mapping
 mv today.png yesterday.png
-wget http://download.geofabrik.de/osm/europe/great_britain/england/cambridgeshire.osm.bz2
+wget http://download.geofabrik.de/europe/great-britain/england/cambridgeshire-latest.osm.bz2
 bunzip2 -f cambridgeshire.osm.bz2
 ./Maperitive.sh Scripts/cambx.mscript
 IMGBASE=dated-images/cambridgeshire-`date +%Y%m%d`

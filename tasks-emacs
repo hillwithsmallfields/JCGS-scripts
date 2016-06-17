@@ -1,10 +1,29 @@
 #!/bin/bash
+
 HOMESERVER=whortleberry
-if [ `hostname` != $HOMESERVER ]
-then
-    echo Pulling org files from server
-    pullorg
+USE_SERVER=true
+
+if [ `hostname` == $HOMESERVER ]
+   USE_SERVER=false
 fi
+
+case $1 in
+    --local) USE_SERVER=false
+	     shift ;;
+    --remote) USE_SERVER=true
+	      shift ;;
+    *)
+esac
+
+if $USE_SERVER
+then
+    if [ `hostname` != whinberry ]
+    then
+	echo Pulling org files from server
+	pullorg
+    fi
+fi
+
 if [ -x /usr/local/bin/emacs ]
 then
     EMACSBIN=/usr/local/bin/emacs
@@ -12,9 +31,14 @@ else
     EMACSBIN=emacs
 fi
 echo Using $EMACSBIN as emacs
+
 $EMACSBIN -q -l $EMACS/special-setups/tasks/tasks-emacs-setup.el $*
-if [ `hostname` != $HOMESERVER ]
+
+if $USE_SERVER
 then
-    echo Pushing org files to server
-    pushorg
+    if [ `hostname` != whinberry ]
+    then
+	echo Pushing org files to server
+	pushorg
+    fi
 fi
