@@ -12,6 +12,9 @@
 # for screen and keypad in the noticeboard at
 # https://github.com/hillwithsmallfields/cnc-things/tree/master/notice-board
 
+# This does the same as agenda-monitor-emacs, and adds the kiosk-style
+# functionality.
+
 if [ ! -v EMACS ]
 then
     . $HOME/.bash_profile
