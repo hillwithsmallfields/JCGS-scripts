@@ -1,5 +1,6 @@
 #!/bin/bash
-if [ `hostname` != whinberry ]
+HOMESERVER=whortleberry
+if [ `hostname` != $HOMESERVER ]
 then
     echo Pulling org files from server
     pullorg
@@ -12,7 +13,7 @@ else
 fi
 echo Using $EMACSBIN as emacs
 $EMACSBIN -q -l $EMACS/special-setups/tasks/tasks-emacs-setup.el $*
-if [ `hostname` != whinberry ]
+if [ `hostname` != $HOMESERVER ]
 then
     echo Pushing org files to server
     pushorg
