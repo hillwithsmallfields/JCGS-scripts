@@ -18,7 +18,14 @@ then
 fi
 while [ ! -f /tmp/stop-agenda-kiosk ]
 do
-    emacs -q -l $EMACS/special-setups/tasks/org-agenda-kiosk.el -f org-agenda-kiosk
+    if [ -x /usr/local/bin/emacs ]
+    then
+	EMACSBIN=/usr/local/bin/emacs
+    else
+	EMACSBIN=emacs
+    fi
+    echo Using $EMACSBIN as emacs
+    $EMACSBIN -q -l $EMACS/special-setups/tasks/org-agenda-kiosk.el -f org-agenda-kiosk
     rm -f /tmp/restart-agenda-kiosk
 done
 rm -f /tmp/stop-agenda-kiosk
