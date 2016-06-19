@@ -4,6 +4,7 @@ HOMESERVER=whortleberry
 USE_SERVER=true
 
 if [ `hostname` == $HOMESERVER ]
+then
    USE_SERVER=false
 fi
 
@@ -17,11 +18,8 @@ esac
 
 if $USE_SERVER
 then
-    if [ `hostname` != whinberry ]
-    then
-	echo Pulling org files from server
-	pullorg
-    fi
+    echo Pulling org files from server
+    pullorg
 fi
 
 if [ -x /usr/local/bin/emacs ]
@@ -36,9 +34,6 @@ $EMACSBIN -q -l $EMACS/special-setups/tasks/tasks-emacs-setup.el $*
 
 if $USE_SERVER
 then
-    if [ `hostname` != whinberry ]
-    then
-	echo Pushing org files to server
-	pushorg
-    fi
+    echo Pushing org files to server
+    pushorg
 fi
