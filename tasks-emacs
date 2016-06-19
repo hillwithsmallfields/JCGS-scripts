@@ -1,10 +1,20 @@
 #!/bin/bash
+
+HOMESERVER=whortleberry
 USE_SERVER=true
+
+if [ `hostname` == $HOMESERVER ]
+   USE_SERVER=false
+fi
+
 case $1 in
     --local) USE_SERVER=false
 	     shift ;;
+    --remote) USE_SERVER=true
+	      shift ;;
     *)
 esac
+
 if $USE_SERVER
 then
     if [ `hostname` != whinberry ]
@@ -13,6 +23,7 @@ then
 	pullorg
     fi
 fi
+
 if [ -x /usr/local/bin/emacs ]
 then
     EMACSBIN=/usr/local/bin/emacs
@@ -20,7 +31,9 @@ else
     EMACSBIN=emacs
 fi
 echo Using $EMACSBIN as emacs
+
 $EMACSBIN -q -l $EMACS/special-setups/tasks/tasks-emacs-setup.el $*
+
 if $USE_SERVER
 then
     if [ `hostname` != whinberry ]
