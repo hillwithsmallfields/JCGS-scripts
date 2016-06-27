@@ -1,5 +1,12 @@
 #!/bin/bash
 
+# If my directory variables aren't defined, run my shell setup.  This
+# is aimed for use from cron.
+if [ -z $OPEN_PROJECTS ]
+then
+    . $HOME/.bashrc
+fi
+
 for GITDIR in $EMACS $ORGLISP $CONFIG $SCRIPTS $OPEN_PROJECTS/wearables $OPEN_PROJECTS/elisp-cad $OPEN_PROJECTS/zorg-mode $OPEN_PROJECTS/cnc-things $OPEN_PROJECTS/natlangfun $OPEN_PROJECTS/mvphotos $OPEN_PROJECTS/ps-verse $OPEN_PROJECTS/qs
 do
     if [ -d $GITDIR ]
