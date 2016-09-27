@@ -1,5 +1,5 @@
 #!/bin/bash
-cd $HOME/messing/mapping
+cd $HOME/mapping
 mv today.png yesterday.png
 wget http://download.geofabrik.de/europe/great-britain/england/cambridgeshire-latest.osm.bz2
 bunzip2 -f cambridgeshire.osm.bz2
