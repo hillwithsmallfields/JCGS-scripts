@@ -15,9 +15,12 @@ do
 	echo Pulling $GITDIR
 	git pull
     else
+	mkdir $GITDIR
+	cd $GITDIR
 	PROJECT=`basename $GITDIR`
-	echo "Skipping $GITDIR (for project $PROJECT) as it does not exist"
-	echo Try git clone https://github.com/hillwithsmallfields/$PROJECT.git
+	# echo "Skipping $GITDIR (for project $PROJECT) as it does not exist"
+	# echo Try git clone https://github.com/hillwithsmallfields/$PROJECT.git
+	git clone https://github.com/hillwithsmallfields/$PROJECT.git
     fi
 done
 
