@@ -1,0 +1,2 @@
+#!/bin/bash
+scp -P ${HOMESERVERSSHPORT} ${SERVERUSER-jcgs}@${HOMESERVER-js64.twilightparadox.com}:$1 $2
