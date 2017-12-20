@@ -1,0 +1,2 @@
+#!/bin/bash
+apt-get install make gcc libx11-dev libgtk-3-dev libxpm-dev libjpeg-dev libgif-dev libtiff5-dev libncurses5-dev libxml2-dev libgpm-dev libm17n-dev libotf-dev librsvg2-dev libgnutls28-dev libmagickcore-dev imagemagick libmagickwand-dev xaw3dg-dev
