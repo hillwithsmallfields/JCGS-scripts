@@ -1,6 +1,6 @@
 #!/bin/bash
 
-HOMESERVER=whortleberry
+HOMESERVER=${HOMESERVER-js64.twilightparadox.com}
 USE_SERVER=true
 
 if [ `hostname` == $HOMESERVER ]
