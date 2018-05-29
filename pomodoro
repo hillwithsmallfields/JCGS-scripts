@@ -1,7 +1,4 @@
 #!/bin/bash
-sleep 1500
-# ${BROWSER-firefox} file://$(randimage /gallery/$USER/photos/Places)
+sleep ${POMODORO-1500}
 eom $(randimage /gallery/$USER/photos/Places) &
-
-
-
+echo $(date --iso-8601=minutes) $* >> $USER/.pomodoros
