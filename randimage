@@ -1,0 +1,21 @@
+#!/usr/bin/python
+
+import argparse
+import os
+import random
+
+def random_file(dir):
+    file = os.path.join(dir, random.choice(os.listdir(dir)))
+    if os.path.isdir(file):
+        return random_file(file)
+    else:
+        return file
+
+def main():
+    parser = argparse.ArgumentParser()
+    parser.add_argument("dir")
+    args = parser.parse_args()
+    print random_file(args.dir)
+
+if __name__ == "__main__":
+    main()
