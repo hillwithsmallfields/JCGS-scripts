@@ -1,4 +1,7 @@
 #!/bin/bash
 sleep 1500
-${BROWSER-firefox} file://$(randimage /gallery/$USER/photos/Places)
+# ${BROWSER-firefox} file://$(randimage /gallery/$USER/photos/Places)
+eom $(randimage /gallery/$USER/photos/Places) &
+
+
 
