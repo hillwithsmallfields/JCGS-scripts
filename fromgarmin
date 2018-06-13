@@ -1,0 +1,12 @@
+#!/bin/bash
+cd ${COMMON-$HOME/common}/exercise
+rm -f incoming/*
+cp /mnt/garmin-watch/GARMIN/ACTIVITY/* incoming
+cd incoming
+for FILE in *
+do
+    if [ -f ../uploaded/$FILE ]
+    then
+        rm $FILE
+    fi
+done
