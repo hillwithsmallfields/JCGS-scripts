@@ -1,11 +1,11 @@
 #!/bin/bash
 echo Pomodoro started at $(date --iso-8601=minutes)
-sleep ${POMODORO-1500}
-LOGFILE=$HOME/.pomodoros
+sleep ${POMODORO_SECS-1500}
+POMODORO_LOG=${POMODORO_LOG-$HOME/.pomodoros}
 GALLERY=/gallery/$USER/photos/Places
 if [ ! -d $GALLERY ]
 then
     GALLERY=$HOME/Pictures
 fi
 eom $(randimage $GALLERY) &
-echo $(date --iso-8601=minutes) $* >> $LOGFILE
+echo $(date --iso-8601=minutes) $* >> $POMODORO_LOG
