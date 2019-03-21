@@ -7,7 +7,7 @@ then
     . $HOME/.bashrc
 fi
 
-for GITDIR in $EMACS $ORGLISP $CONFIG $SCRIPTS $OPEN_PROJECTS/emacs-versor $OPEN_PROJECTS/wearables $OPEN_PROJECTS/elisp-cad $OPEN_PROJECTS/zorg-mode $OPEN_PROJECTS/cnc-things $OPEN_PROJECTS/natlangfun $OPEN_PROJECTS/mvphotos $OPEN_PROJECTS/ps-verse $OPEN_PROJECTS/qs $OPEN_PROJECTS/textualosm $OPEN_PROJECTS/arduino-mode $OPEN_PROJECTS/ledger $OPEN_PROJECTS/ledger-mode $OPEN_PROJECTS/workshop-layouts $OPEN_PROJECTS/noticeboard $OPEN_PROJECTS/Python-as-FP $OPEN_PROJECTS/makers
+for GITDIR in $EMACS $ORGLISP $CONFIG $SCRIPTS $OPEN_PROJECTS/emacs-versor $OPEN_PROJECTS/wearables $OPEN_PROJECTS/elisp-cad $OPEN_PROJECTS/zorg-mode $OPEN_PROJECTS/cnc-things $OPEN_PROJECTS/natlangfun $OPEN_PROJECTS/mvphotos $OPEN_PROJECTS/ps-verse $OPEN_PROJECTS/qs $OPEN_PROJECTS/textualosm $OPEN_PROJECTS/arduino-mode $OPEN_PROJECTS/ledger $OPEN_PROJECTS/ledger-mode $OPEN_PROJECTS/workshop-layouts $OPEN_PROJECTS/noticeboard $OPEN_PROJECTS/Python-as-FP $OPEN_PROJECTS/makers $OPEN_PROJECTS/JCGS_py_server
 do
     if [ -d $GITDIR ]
     then
