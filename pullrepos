@@ -7,21 +7,12 @@ then
     . $HOME/.bashrc
 fi
 
-for GITDIR in $EMACS $ORGLISP $CONFIG $SCRIPTS $OPEN_PROJECTS/emacs-versor $OPEN_PROJECTS/wearables $OPEN_PROJECTS/elisp-cad $OPEN_PROJECTS/zorg-mode $OPEN_PROJECTS/cnc-things $OPEN_PROJECTS/natlangfun $OPEN_PROJECTS/mvphotos $OPEN_PROJECTS/ps-verse $OPEN_PROJECTS/qs $OPEN_PROJECTS/textualosm $OPEN_PROJECTS/arduino-mode $OPEN_PROJECTS/ledger $OPEN_PROJECTS/ledger-mode $OPEN_PROJECTS/workshop-layouts $OPEN_PROJECTS/noticeboard $OPEN_PROJECTS/Python-as-FP $OPEN_PROJECTS/makers $OPEN_PROJECTS/JCGS_py_server
+for REPOFILE in ~/JCGS-emacs/.git ~/JCGS-org-mode/.git ~/JCGS-config/.git ~/JCGS-scripts/.git $(find $OPEN_PROJECTS -name .git)
 do
-    if [ -d $GITDIR ]
-    then
-	cd $GITDIR
-	echo Pulling $GITDIR
-	git pull
-    else
-	mkdir $GITDIR
-	cd $GITDIR
-	PROJECT=`basename $GITDIR`
-	# echo "Skipping $GITDIR (for project $PROJECT) as it does not exist"
-	# echo Try git clone https://github.com/hillwithsmallfields/$PROJECT.git
-	git clone https://github.com/hillwithsmallfields/$PROJECT.git
-    fi
+    GITDIR=$(dirname $REPOFILE)
+    cd $GITDIR
+    echo Pulling $GITDIR
+    git pull
 done
 
 $SCRIPTS/afterpull
