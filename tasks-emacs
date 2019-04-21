@@ -1,27 +1,5 @@
 #!/bin/bash
 
-HOMESERVER=${HOMESERVER-js64.twilightparadox.com}
-USE_SERVER=true
-
-if [ `hostname` == $HOMESERVER ]
-then
-   USE_SERVER=false
-fi
-
-case $1 in
-    --local) USE_SERVER=false
-	     shift ;;
-    --remote) USE_SERVER=true
-	      shift ;;
-    *)
-esac
-
-if $USE_SERVER
-then
-    echo Pulling org files from server
-    pullorg
-fi
-
 if [ -x /usr/local/bin/emacs ]
 then
     EMACSBIN=/usr/local/bin/emacs
@@ -31,9 +9,3 @@ fi
 echo Using $EMACSBIN as emacs
 
 $EMACSBIN -q -l $EMACS/special-setups/tasks/tasks-emacs-setup.el $*
-
-if $USE_SERVER
-then
-    echo Pushing org files to server
-    pushorg
-fi
