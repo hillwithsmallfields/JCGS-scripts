@@ -1,0 +1,4 @@
+#!/bin/bash
+cd $HOME/mapping
+mv josm-tested.jar josm-tested-old.jar
+wget https://josm.openstreetmap.de/josm-tested.jar
