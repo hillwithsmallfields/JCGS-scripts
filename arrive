@@ -1,0 +1,10 @@
+#!/bin/bash
+OP=${OPEN_PROJECTS-$HOME/open-projects}
+mkdir -p $OP
+cd $OP
+HUB=https://github.com/hillwithsmallfields
+for REPO in JCGS-emacs JCGS-org-mode JCGS-scripts JCGS-config
+do
+    git clone $HUB/$REPO.git
+done
+ln -s $OP/JCGS-emacs $OP/JCGS-org-mode $HOME
