@@ -1,0 +1,5 @@
+#!/bin/bash
+PNGNAME=$(basename $1 .gv).png
+dot -Tpng -o $PNGNAME $1
+eom $PNGNAME
+
