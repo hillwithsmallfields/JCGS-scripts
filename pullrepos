@@ -1,6 +1,19 @@
 #!/bin/bash
 
 ALL=false			# todo: flag for this
+SUBCOMMAND=pull
+
+while getopts ":ac:" opt; do
+    case ${opt} in
+        a) ALL=true
+           ;;
+        c) SUBCOMMAND=$OPTARG
+           ;;
+        \?) echo "Usage: pullrepos [-a] [-c gitcommand]"
+            ;;
+    esac
+done
+shift $((OPTIND -1))
 
 # If my directory variables aren't defined, run my shell setup.  This
 # is aimed for use from cron.
@@ -9,11 +22,12 @@ then
     . $HOME/.bashrc
 fi
 
-for GITDIR in $MY_PROJECTS
+for GITDIR in $MY_PROJECTS/*
 do
-    cd $GITDIR
+    pushd $GITDIR
     echo Pulling $GITDIR
-    git pull
+    git $SUBCOMMAND
+    popd
 done
 
 if $ALL
@@ -21,9 +35,10 @@ then
     for REPOFILE in $(find $OPEN_PROJECTS -name .git)
     do
 	GITDIR=$(dirname $REPOFILE)
-	cd $GITDIR
+	pushd $GITDIR
 	echo Pulling $GITDIR
-	git pull
+	git $SUBCOMMAND
+	popd
     done
 fi
 
