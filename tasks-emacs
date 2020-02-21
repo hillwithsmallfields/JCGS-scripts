@@ -8,4 +8,4 @@ else
 fi
 echo Using $EMACSBIN as emacs
 
-$EMACSBIN -q -l $EMACS/special-setups/tasks/tasks-emacs-setup.el $*
+$EMACSBIN -q -l $MY_ELISP/special-setups/tasks/tasks-emacs-setup.el $*

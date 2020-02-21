@@ -28,7 +28,7 @@ do
 	EMACSBIN=emacs
     fi
     echo Using $EMACSBIN as emacs
-    $EMACSBIN -q -l $EMACS/special-setups/tasks/org-agenda-kiosk.el -f org-agenda-kiosk
+    $EMACSBIN -q -l $MY_ELISP/special-setups/tasks/org-agenda-kiosk.el -f org-agenda-kiosk
     rm -f /tmp/restart-agenda-kiosk
 done
 rm -f /tmp/stop-agenda-kiosk

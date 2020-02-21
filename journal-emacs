@@ -1,2 +1,2 @@
 #!/bin/bash
-emacs -q -l $EMACS/special-setups/journal/journal-emacs-setup.el
+emacs -q -l $MY_ELISP/special-setups/journal/journal-emacs-setup.el
