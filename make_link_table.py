@@ -3,6 +3,16 @@
 import argparse
 import yaml
 
+def output_list(f, contents):
+    f.write("        <ul>\n")
+    for title, url in contents:
+        if isinstance(url, str):
+            f.write("          <li> <a href=\"%s\" target=\"_blank\">%s</a></li>\n" % (url, title))
+        else:
+            f.write("          <li>%s</li>\n" % title)
+            output_list(f, url.items())
+    f.write("        </ul>\n")
+
 def output_table(table, filename):
     with open(filename, 'w') as f:
         widest = 0
@@ -20,10 +30,9 @@ def output_table(table, filename):
             f.write("       </tr>\n")
             f.write("      <tr>\n")
             for _, cell in group.items():
-                f.write("      <td>\n        <ul>\n")
-                for title, url in cell.items():
-                    f.write("          <li> <a href=\"%s\" target=\"_blank\">%s</a></li>\n" % (url, title))
-                f.write("        </ul>\n      </td>\n")
+                f.write("      <td>\n")
+                output_list(f, cell.items())
+                f.write("      </td>\n")
             f.write("      </tr>\n")
         f.write("    </table>\n  </body>\n</html>\n")
 
