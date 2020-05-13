@@ -30,6 +30,13 @@ def write_connections_chart(data, outfile, grouped, coloured, linkorgs):
     for a, bs in data['connections'].items():
         for b in bs.split():
             outfile.write("    " + a + " -- " + b + "\n")
+    for extragroupname, extragroupmembers in data.get('otheractivities', []).items():
+        for person in extragroupmembers.split():
+            outfile.write("        " + person + " -- " + groupname + " [style=dashed")
+            if coloured:
+                outfile.write(", color=\"" + str(colour.Color(pick_for=groupname)) + "\"")
+            outfile.write("]\n")
+
     outfile.write("}\n")
 
 def main():
