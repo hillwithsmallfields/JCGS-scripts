@@ -2,6 +2,7 @@
 
 import argparse
 import yaml
+import os.path
 
 def output_list(f, contents):
     f.write("        <ul>\n")
@@ -21,7 +22,8 @@ def output_table(table, filename):
             if groupwidth > widest:
                 widest = groupwidth
         f.write("<html>\n  <head>\n    <title>")
-        f.write("</title>  </head>\n  <body>\n    <table border>\n")
+        f.write(os.path.basename(filename).split('.')[0].capitalize())
+        f.write("</title>\n  </head>\n  <body>\n    <table border>\n")
         for groupname, group in table.items():
             f.write("       <tr><th colspan=\"%d\">%s</th></tr>\n" % (widest, groupname))
             f.write("       <tr>\n")
@@ -44,7 +46,6 @@ def main():
     with open(args.inputfile) as infile:
         contents = yaml.load(infile, Loader=yaml.SafeLoader)
         output_table(contents, args.output or (args.inputfile + ".html"))
-        
+
 if __name__ == "__main__":
     main()
-    
