@@ -11,9 +11,10 @@ def write_connections_chart(data, outfile, grouped, coloured):
         if grouped:
             outfile.write("    subgraph " + groupname + "_cm {\n")
         for person in groupmembers:
+            print("person is", person)
             outfile.write("        " + person + " [label=\"" + person.replace('_', ' ') + "\"")
             if coloured:
-                outfile.write(", color=" + colour.Color(pick_for=groupname) + ", style=filled")
+                outfile.write(", color=" + str(colour.Color(pick_for=groupname)) + ", style=filled")
             outfile.write("]\n")
         if grouped:
             outfile.write("    }\n")
