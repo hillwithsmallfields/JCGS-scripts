@@ -4,24 +4,40 @@ import argparse
 import colour
 import yaml
 
-def write_connections_chart(data, outfile, grouped, coloured):
-    outfile.write("graph connections {\n")
+def write_connections_chart(data, outfile, grouped, coloured, linkorgs):
+    outfile.write("graph connections {\n    rankdir=LR\n")
     for groupname, groupmembers in data['groups'].items():
-        print(groupname, "includes", groupmembers)
         if grouped:
-            outfile.write("    subgraph " + groupname + "_cm {\n")
+            outfile.write("    subgraph cluster_" + groupname + "_cm {\n")
+        if linkorgs:
+            outfile.write("    " + groupname + " [shape=octagon")
+            if coloured:
+                groupcolour = str(colour.Color(pick_for=groupname))
+                outfile.write(", style=filled, color=\"" + groupcolour + "\"")
+            outfile.write("]\n")
         for person in groupmembers:
             print("person is", person)
             outfile.write("        " + person + " [label=\"" + person.replace('_', ' ') + "\"")
             if coloured:
-                outfile.write(", color=" + str(colour.Color(pick_for=groupname)) + ", style=filled")
+                outfile.write(", color=\"" + groupcolour + "\", style=filled")
             outfile.write("]\n")
+            if linkorgs:
+                outfile.write("        " + person + " -- " + groupname + " [style=dashed")
+                if coloured:
+                    outfile.write(", color=\"" + groupcolour + "\"")
+                outfile.write("]\n")
         if grouped:
             outfile.write("    }\n")
     for a, bs in data['connections'].items():
-        print(a, "knows", bs)
         for b in bs.split():
             outfile.write("    " + a + " -- " + b + "\n")
+    for extragroupname, extragroupmembers in data.get('otheractivities', []).items():
+        for person in extragroupmembers.split():
+            outfile.write("        " + person + " -- " + groupname + " [style=dashed")
+            if coloured:
+                outfile.write(", color=\"" + str(colour.Color(pick_for=groupname)) + "\"")
+            outfile.write("]\n")
+
     outfile.write("}\n")
 
 def main():
@@ -30,6 +46,7 @@ def main():
     parser.add_argument("-o", "--output")
     parser.add_argument("-g", "--grouped", action='store_true')
     parser.add_argument("-c", "--coloured", action='store_true')
+    parser.add_argument("-l", "--linkorgs", action='store_true')
     parser.add_argument("inputfile")
     args = parser.parse_args()
     with open(args.inputfile) as infile:
@@ -38,7 +55,8 @@ def main():
                                               Loader=yaml.SafeLoader),
                                     outfile,
                                     args.grouped,
-                                    args.coloured)
+                                    args.coloured,
+                                    args.linkorgs)
 
 if __name__ == "__main__":
     main()
