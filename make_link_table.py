@@ -3,14 +3,21 @@
 import argparse
 import yaml
 import os.path
+import re
+
+def htmlize(string):
+    """Convert markup to HTML."""
+    m = re.search("(.*)\*(.+)\*(.*)", string)
+    return m.group(1) + "<b>" + m.group(2) + "</b>" + m.group(3) if m else string
 
 def output_list(f, contents):
+    """Output a YAML list as HTML using nested lists as needed."""
     f.write("        <ul>\n")
     for title, url in contents:
         if isinstance(url, str):
-            f.write("          <li> <a href=\"%s\" target=\"_blank\">%s</a></li>\n" % (url, title))
+            f.write("          <li> <a href=\"%s\" target=\"_blank\">%s</a></li>\n" % (url, htmlize(title)))
         else:
-            f.write("          <li>%s</li>\n" % title)
+            f.write("          <li>%s</li>\n" % (title))
             output_list(f, url.items())
     f.write("        </ul>\n")
 
