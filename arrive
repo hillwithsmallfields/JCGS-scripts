@@ -1,10 +1,12 @@
 #!/bin/bash
-OP=${OPEN_PROJECTS-$HOME/open-projects}
-mkdir -p $OP
-cd $OP
-HUB=https://github.com/hillwithsmallfields
-for REPO in JCGS-emacs JCGS-org-mode JCGS-scripts JCGS-config
+sudo apt-get install jq git emacs openscad kicad python3-pip
+sudo pip3 install ordered_set sexpdata pyyaml oura measurement python-decouple overpass2 webpy pycrypto
+MYOP=${OPEN_PROJECTS-$HOME/open-projects/github/hillwithsmallfields}
+mkdir -p $MYOP
+cd $MYOP
+for REPO in $(curl https://api.github.com/users/hillwithsmallfields/repos | jq "map(.clone_url)[]")
 do
-    git clone $HUB/$REPO.git
+    git clone $REPO
 done
 ln -s $OP/JCGS-emacs $OP/JCGS-org-mode $HOME
+# todo: now copy .emacs, .bashrc, .bash_profile etc into place
