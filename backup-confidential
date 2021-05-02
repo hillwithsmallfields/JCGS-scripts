@@ -1,0 +1,15 @@
+#!/bin/bash
+
+PLAINTEXT_TARBALL=personal-$(date --iso-8601=date).tgz  # keep this in the encrypted directory
+CYPHERTEXT_DIRECTORY=/tmp
+CYPHERTEXT_TARBALL=$CYPHERTEXT_DIRECTORY/$PLAINTEXT_TARBALL.gpg
+
+cd /mnt/crypted/$USER
+
+tar czf $PLAINTEXT_TARBALL personal
+gpg --output $CYPHERTEXT_TARBALL --encrypt $PLAINTEXT_TARBALL
+
+shasum -a 256 $PLAINTEXT_TARBALL | awk '{print $1}' > $CYPHERTEXT_DIRECTORY/$PLAINTEXT_TARBALL.sha256sum
+gpg --output $CYPHERTEXT_DIRECTORY/$PLAINTEXT_TARBALL.sha256sum.sig --sign $CYPHERTEXT_DIRECTORY/$PLAINTEXT_TARBALL.sha256sum
+
+rm $PLAINTEXT_TARBALL
