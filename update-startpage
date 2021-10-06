@@ -1,0 +1,2 @@
+#!/bin/bash
+make_link_table.py --output ~/private_html/startpage.html --stylesheet ~/common/org/startpage.css ~/common/org/startpage.yaml
