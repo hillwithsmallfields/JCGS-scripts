@@ -1,5 +1,7 @@
 #!/usr/bin/python3
 
+# use ifconfig to get the address and raspi-config to enable ssh
+
 import argparse
 import getpass
 import glob
@@ -23,7 +25,7 @@ PIP_PACKAGES=[
     ]
 DOT_FILES=["emacs", "bashrc", "bash_profile"]
 
-MY_PROJECTS_DIRECTORY="%s/open-projects/github.com/hillwithsmallfields"
+MY_PROJECTS_DIRECTORY="open-projects/github.com/hillwithsmallfields"
 MY_CONFIG_PROJECT="JCGS-config"
 MY_GITHUB_LIST="https://api.github.com/users/hillwithsmallfields/repos"
 
@@ -54,27 +56,30 @@ def main():
         print("installing", package, "with pip3")
         os.system("pip3 install %s" % package)
 
-    # Add the user, with their password disabled but ssh login allowed
+    # Add the user (if not already present), with their password
+    # disabled but ssh login allowed:
     try:
         _ = pwd.getpwnam(args.user)
     except KeyError:
-        os.system('adduser --disabled-password --gecos "%s" %s gpio' % (args.user, args.name))
+        os.system('adduser --disabled-password --gecos "%s" %s' % (args.name, args.user))
     print("on desktop, do this: ssh-copy-id -i ~/.ssh/mykey %s@%s" % (args.user, args.host))
 
     with open("/etc/sudoers", 'a') as sudoers:
         sudoers.write("%s    ALL=(ALL:ALL) ALL\n" % args.user)
 
+    # If there is an external disk attached, put it where I want it:
     drive = "/dev/sda1"
     mountpoint = "/mnt/hdd0"
+
     if os.path.exists(drive):
         if not in_fstab(drive):
-            system("umount " + drive)
+            os.system("umount " + drive)
             if not os.path.exists("/etc/fstab-old"):
-                shutil.copy_file("/etc/fstab", "/etc/fstab-old")
+                shutil.copy("/etc/fstab", "/etc/fstab-old")
             with open("/etc/fstab", 'a') as fstab:
                 fstab.write("%s %s ext4 defaults 0 0\n" % (drive, mountpoint))
-            os.makedirs(mountpoint, exists_ok=True)
-            system("mount " + drive)
+            os.makedirs(mountpoint, 0o777, True)
+            os.system("mount " + drive)
         if os.path.isdir(mountpoint):
             for filename in glob.glob(mountpoint+"/*"):
                 os.symlink(os.path.join(home_directory, os.path.basename(filename)), filename)
@@ -83,15 +88,16 @@ def main():
     os.setuid(pwd.getpwnam(args.user)[2])
 
     projects_dir = os.path.join(home_directory, MY_PROJECTS_DIRECTORY)
+    os.makedirs(projects_dir)
     os.chdir(projects_dir)
     for repo in requests.get(MY_GITHUB_LIST).json():
         if not os.path.isdir(os.path.join(projects_dir, repo['name'])):
             print("Cloning", repo['name'])
             os.system("git clone " + repo['git_url'])
 
-    config_dir = os.path.join(MY_PROJECTS_DIRECTORY, MY_CONFIG_PROJECT)
+    config_dir = os.path.join(projects_dir, MY_CONFIG_PROJECT)
     for dot_file in DOT_FILES:
-        shutil.copy_file(os.path.join(config_dir, dot_file),
+        shutil.copy(os.path.join(config_dir, dot_file),
                          os.path.join(home_directory, "." + dot_file))
 
 if __name__ == "__main__":
