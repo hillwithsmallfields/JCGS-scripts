@@ -19,10 +19,10 @@ import socket
 import sys
 
 configuration = {
-    'apt_packages': [
+    'apt-packages': [
         "emacs"
     ],
-    'pip_packages': [
+    'pip-packages': [
         "measurement",
         "ordered_set",
         "oura",
@@ -33,13 +33,14 @@ configuration = {
         "sexpdata",
         "webpy"
     ],
-    'dot_files': ["emacs",
+    'dot-files': ["emacs",
                   "bashrc",
                   "bash_profile"],
+    'ext-drive': "/dev/sda1",
     'mountpoint': "/mnt/hdd0",
-    'projects_directory': "open-projects/github.com/hillwithsmallfields",
-    'config_project': "JCGS-config",
-    'github_list': "https://api.github.com/users/hillwithsmallfields/repos"
+    'projects-directory': "open-projects/github.com/hillwithsmallfields",
+    'config-project': "JCGS-config",
+    'github-list': "https://api.github.com/users/hillwithsmallfields/repos"
 }
 
 MODEL_FILENAME = "/proc/device-tree/model"
@@ -87,6 +88,27 @@ def set_hostname(newname):
             for host in hosts:
                 hoststream.write(host)
 
+def add_user(user):
+    """Add the user (if not already present), with their password
+    disabled but ssh login allowed.
+    Also put them in /etc/sudoers."""
+    if user and user == "":
+        print("No user specified")
+        return None
+    try:
+        _ = pwd.getpwnam(user)
+    except KeyError:
+        sh('adduser --disabled-password --gecos "%s" %s' % (configuration['name'], user))
+    print("run 'sudo passwd %s' to set your password" % user)
+    print("then on desktop, do this: ssh-copy-id %s@%s" % (user, configuration['host']))
+
+    sh("ssh-keygen -A && update-rc.d ssh enable && invoke-rc.d ssh start") # from the insides of raspi-config
+
+    append_if_missing("/etc/sudoers",
+                      user,
+                      "%s    ALL=(ALL:ALL) ALL\n" % user)
+    return user
+
 def sh(command):
     print("Running command", command)
     os.system(command)
@@ -101,6 +123,8 @@ def main():
     parser.add_argument("--user")
     parser.add_argument("--name")
     parser.add_argument("--host")
+    parser.add_argument("--ext-drive")
+    parser.add_argument("--mountpoint")
     parser.add_argument("--configuration",
                         help="""Filename or URL (JSON) overriding built-in settings.
                         Command line --user, --name, and --host override this file.
@@ -126,43 +150,31 @@ def main():
 
     home_directory = "/home/" + configuration['user']
 
-    set_hostname(configuration['host'])
+    if configuration.get('host', "") != "":
+        set_hostname(configuration['host'])
 
     hostname = socket.gethostname()
     hostaddr = socket.gethostbyname(hostname)
 
     print("Running on host", hostname, "at address", hostaddr)
 
-    for package in configuration['apt_packages']:
-        sh("apt-get install %s" % package)
-    for package in configuration['pip_packages']:
+    for package in configuration['apt-packages']:
+        sh("apt-get install --assume-yes %s" % package)
+    for package in configuration['pip-packages']:
         sh("pip3 install %s" % package)
 
-    # Add the user (if not already present), with their password
-    # disabled but ssh login allowed:
-    try:
-        _ = pwd.getpwnam(configuration['user'])
-    except KeyError:
-        sh('adduser --disabled-password --gecos "%s" %s' % (configuration['name'], configuration['user']))
-    print("run 'sudo passwd %s' to set your password" % configuration['user'])
-    print("then on desktop, do this: ssh-copy-id %s@%s" % (configuration['user'], configuration['host']))
-
-    sh("ssh-keygen -A && update-rc.d ssh enable && invoke-rc.d ssh start") # from the insides of raspi-config
-
-    append_if_missing("/etc/sudoers",
-                      configuration['user'],
-                      "%s    ALL=(ALL:ALL) ALL\n" % configuration['user'])
+    user = add_user(configuration.get('user'))
 
     # If there is an external disk attached, put it where I want it:
-    drive = "/dev/sda1"
+    ext_disk = configuration.get('ext-drive')
 
-    if os.path.exists(drive):
-        sh("umount " + drive)
+    if ext_disk and os.path.exists(ext_disk):
+        sh("umount " + ext_disk)
         append_if_missing("/etc/fstab",
-                          drive,
-                          "%s %s ext4 defaults 0 0\n" % (drive, configuration['mountpoint']))
+                          ext_disk,
+                          "%s %s ext4 defaults 0 0\n" % (ext_disk, configuration['mountpoint']))
         os.makedirs(configuration['mountpoint'], 0o777, True)
-        sh("mount " + drive)
+        sh("mount " + ext_disk)
         if os.path.isdir(configuration['mountpoint']):
             user_dir = os.path.join(configuration['mountpoint'] + "home" + configuration['user'])
             if os.path.isdir(user_dir):
@@ -171,22 +183,28 @@ def main():
                     os.symlink(os.path.join(home_directory, os.path.basename(filename)), filename)
 
     # Do the rest as the new user
-    os.setuid(pwd.getpwnam(configuration['user'])[2])
+    if user:
+        os.setuid(pwd.getpwnam(user)[2])
 
-    projects_dir = os.path.join(home_directory, configuration['projects_directory'])
-    os.makedirs(projects_dir)
-    os.chdir(projects_dir)
-    for repo in requests.get(configuration['github_list']).json():
-        if not os.path.isdir(os.path.join(projects_dir, repo['name'])):
-            sh("git clone " + repo['git_url'])
+    projects_dir_conf = configuration.get('projects-directory')
+    if projects_dir_conf:
+        projects_dir = os.path.join(home_directory, projects_dir_conf)
+        os.makedirs(projects_dir)
+        os.chdir(projects_dir)
+        for repo in requests.get(configuration['github-list']).json():
+            if not os.path.isdir(os.path.join(projects_dir, repo['name'])):
+                sh("git clone " + repo['git_url'])
 
-    # Now copy my dotfiles into place:
-    config_dir = os.path.join(projects_dir, configuration['config_project'])
-    for dot_file in configuration['dot_files']:
-        origin = os.path.join(config_dir, dot_file)
-        if os.path.isfile(origin):
-            shutil.copy(origin,
-                        os.path.join(home_directory, "." + dot_file))
+        # Now copy my dotfiles into place:
+        dot_files = configuration.get('dot-files')
+        config_project = configuration.get('config-project')
+        if dot_files and config_project:
+            config_dir = os.path.join(projects_dir, config_project)
+            for dot_file in dot_files:
+                origin = os.path.join(config_dir, dot_file)
+                if os.path.isfile(origin):
+                    shutil.copy(origin,
+                                os.path.join(home_directory, "." + dot_file))
 
 if __name__ == "__main__":
     main()
