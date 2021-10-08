@@ -31,12 +31,16 @@ configuration = {
     'dot-files': ["emacs",
                   "bashrc",
                   "bash_profile"],
+    'git-repos': [],
+    'repos-directory': "$HOME/open-projects",
     'ext-drive': "/dev/sda1",
     'mount-point': "/mnt/hdd0",
     'projects-directory': "open-projects/github.com/hillwithsmallfields",
     'config-project': "JCGS-config",
     'github-list': "https://api.github.com/users/hillwithsmallfields/repos"
 }
+
+dirmask = 0o777
 
 MODEL_FILENAME = "/proc/device-tree/model"
 
@@ -169,7 +173,7 @@ def main():
         append_if_missing("/etc/fstab",
                           ext_disk,
                           "%s %s ext4 defaults 0 0\n" % (ext_disk, mount_point))
-        os.makedirs(mount_point, 0o777, True)
+        os.makedirs(mount_point, dirmask, True)
         sh("mount " + ext_disk)
         if os.path.isdir(mount_point):
             user_dir = os.path.join(mount_point, "home", user)
@@ -205,6 +209,21 @@ def main():
                 if os.path.isfile(origin):
                     shutil.copy(origin,
                                 os.path.join(home_directory, "." + dot_file))
+
+    repos = configuration.get('git-repos')
+    repos_directory = configuration.get('repos-directory')
+
+    if repos and repos_directory:
+        repos_directory = os.path.expandvars(repos_directory)
+        for repo in repos:
+            # assuming github-style naming:
+            repo_name_parts = repo.split("/")
+            author = "/".join(repo_name_parts[3:-1]) # from after the host to before the repo filename
+            author_directory = os.path.join(repos_directory, author)
+            os.makedirs(author_directory, dirmask, True)
+            os.chdir(author_directory)
+            print("cloning", repo, "under author directory", author_directory)
+            sh("git clone " + repo)
 
 if __name__ == "__main__":
     main()
