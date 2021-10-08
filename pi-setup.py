@@ -4,7 +4,7 @@
 
 # use ifconfig to get the address
 
-# curl https://raw.githubusercontent.com/hillwithsmallfields/JCGS-scripts/master/pi-setup.py | sudo python3 - --config https://raw.githubusercontent.com/hillwithsmallfields/JCGS-config/master/pi-setup-config.json --host shtogu
+# curl https://raw.githubusercontent.com/hillwithsmallfields/JCGS-scripts/master/pi-setup.py | sudo python3 - --default_config --host shtogu
 
 import argparse
 import getpass
@@ -119,22 +119,43 @@ def main():
         sys.exit(1)
 
     parser = argparse.ArgumentParser()
-    parser.add_argument("--user")
-    parser.add_argument("--name")
-    parser.add_argument("--host")
-    parser.add_argument("--ext-drive")
-    parser.add_argument("--mount-point")
+    parser.add_argument("--user",
+                        help="""The account name of the user to create.""")
+    parser.add_argument("--name",
+                        help="""The full name of the user.""")
+    parser.add_argument("--host",
+                        help="""The name to give the host.""")
+    parser.add_argument("--ext-drive",
+                        help="""The expected name of an external drive.""")
+    parser.add_argument("--mount-point",
+                        help="""The mount point to place the external drive at,
+                        if there is one.""")
     parser.add_argument("--configuration",
                         help="""Filename or URL (JSON) overriding built-in settings.
                         Command line --user, --name, and --host override this file.
                         If the string has % in it, the model of the Pi is substituted.
                         Use %.1s to get a single digit or Z for Zero or C for
                         Compute Module or M for the original model.""")
+    parser.add_argument("--default-config",
+                        action='store_true',
+                        help="""Use a standard configuration file.""")
+    parser.add_argument("--auto-config",
+                        action='store_true',
+                        help="""Use a standard configuration file which is different
+                        for each model of Pi.""")
     args = parser.parse_args()
 
     global configuration
-    if args.configuration:
-        confname = args.configuration
+
+    confname = ("https://raw.githubusercontent.com/hillwithsmallfields/JCGS-config/master/pi-setup-config.json"
+                if args.default_config
+                else ("https://raw.githubusercontent.com/hillwithsmallfields/JCGS-config/master/pi-%.1s-setup-config.json"
+                      if args.auto_config
+                      else (args.configuration
+                            if args.configuration
+                            else None)))
+
+    if confname:
         if '%' in confname:
             confname %= model()
         if confname.startswith("https://") or confname.startswith("http://"):
