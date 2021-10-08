@@ -4,7 +4,7 @@
 
 # use ifconfig to get the address
 
-# curl -o pi-setup.py https://raw.githubusercontent.com/hillwithsmallfields/JCGS-scripts/master/pi-setup.py && chmod a+x pi-setup.py && sudo ./pi-setup.py --config https://raw.githubusercontent.com/hillwithsmallfields/JCGS-config/master/pi-setup-config.json
+# curl https://raw.githubusercontent.com/hillwithsmallfields/JCGS-scripts/master/pi-setup.py | sudo python3 - --config https://raw.githubusercontent.com/hillwithsmallfields/JCGS-config/master/pi-setup-config.json --host shtogu
 
 import argparse
 import getpass
@@ -23,21 +23,16 @@ configuration = {
         "emacs"
     ],
     'pip-packages': [
-        "measurement",
-        "ordered_set",
-        "oura",
-        "overpass2",
         "pycrypto",
         "python-decouple",
         "pyyaml",
-        "sexpdata",
-        "webpy"
+        "sexpdata"
     ],
     'dot-files': ["emacs",
                   "bashrc",
                   "bash_profile"],
     'ext-drive': "/dev/sda1",
-    'mountpoint': "/mnt/hdd0",
+    'mount-point': "/mnt/hdd0",
     'projects-directory': "open-projects/github.com/hillwithsmallfields",
     'config-project': "JCGS-config",
     'github-list': "https://api.github.com/users/hillwithsmallfields/repos"
@@ -124,7 +119,7 @@ def main():
     parser.add_argument("--name")
     parser.add_argument("--host")
     parser.add_argument("--ext-drive")
-    parser.add_argument("--mountpoint")
+    parser.add_argument("--mount-point")
     parser.add_argument("--configuration",
                         help="""Filename or URL (JSON) overriding built-in settings.
                         Command line --user, --name, and --host override this file.
@@ -148,8 +143,6 @@ def main():
         if v:
             configuration[k] = v
 
-    home_directory = "/home/" + configuration['user']
-
     if configuration.get('host', "") != "":
         set_hostname(configuration['host'])
 
@@ -164,19 +157,22 @@ def main():
         sh("pip3 install %s" % package)
 
     user = add_user(configuration.get('user'))
+    home_directory = os.path.join("/home", user)
 
     # If there is an external disk attached, put it where I want it:
     ext_disk = configuration.get('ext-drive')
+    mount_point = configuration.get('mount-point')
 
-    if ext_disk and os.path.exists(ext_disk):
+    if ext_disk and os.path.exists(ext_disk) and mount_point:
+        print("Moving", ext_disk, "to mount point", mount_point)
         sh("umount " + ext_disk)
         append_if_missing("/etc/fstab",
                           ext_disk,
-                          "%s %s ext4 defaults 0 0\n" % (ext_disk, configuration['mountpoint']))
-        os.makedirs(configuration['mountpoint'], 0o777, True)
+                          "%s %s ext4 defaults 0 0\n" % (ext_disk, mount_point))
+        os.makedirs(mount_point, 0o777, True)
         sh("mount " + ext_disk)
-        if os.path.isdir(configuration['mountpoint']):
-            user_dir = os.path.join(configuration['mountpoint'] + "home" + configuration['user'])
+        if os.path.isdir(mount_point):
+            user_dir = os.path.join(mount_point, "home", user)
             if os.path.isdir(user_dir):
                 print("Linking user files from HDD")
                 for filename in glob.glob(user_dir+"/*"):
@@ -184,15 +180,19 @@ def main():
 
     # Do the rest as the new user
     if user:
+        print("Doing rest of setup as", user)
         os.setuid(pwd.getpwnam(user)[2])
 
-    projects_dir_conf = configuration.get('projects-directory')
-    if projects_dir_conf:
-        projects_dir = os.path.join(home_directory, projects_dir_conf)
+    projects_dir_name = configuration.get('projects-directory')
+    if projects_dir_name:
+        projects_dir = os.path.join(home_directory, projects_dir_name)
         os.makedirs(projects_dir)
         os.chdir(projects_dir)
+        print("Cloning projects into", projects_dir)
         for repo in requests.get(configuration['github-list']).json():
-            if not os.path.isdir(os.path.join(projects_dir, repo['name'])):
+            if os.path.isdir(os.path.join(projects_dir, repo['name'])):
+                print("Already got", repo['name'])
+            else:
                 sh("git clone " + repo['git_url'])
 
         # Now copy my dotfiles into place:
