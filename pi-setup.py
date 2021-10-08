@@ -1,5 +1,7 @@
 #!/usr/bin/python3
 
+# Program to install my usual environment on a freshly-installed Raspian
+
 # use ifconfig to get the address
 
 # curl -o pi-setup.py https://raw.githubusercontent.com/hillwithsmallfields/JCGS-scripts/master/pi-setup.py && chmod a+x pi-setup.py && sudo ./pi-setup.py --config https://raw.githubusercontent.com/hillwithsmallfields/JCGS-config/master/pi-setup-config.json
@@ -13,6 +15,7 @@ import pwd
 import re
 import requests
 import shutil
+import socket
 import sys
 
 configuration = {
@@ -32,12 +35,14 @@ configuration = {
     ],
     'dot_files': ["emacs",
                   "bashrc",
-                  "bash_profile"]}
+                  "bash_profile"],
+    'mountpoint': "/mnt/hdd0",
+    'projects_directory': "open-projects/github.com/hillwithsmallfields",
+    'config_project': "JCGS-config",
+    'github_list': "https://api.github.com/users/hillwithsmallfields/repos"
+}
 
-MODEL_FILENAME = "/sys/firmware/devicetree/base/model"
-MY_PROJECTS_DIRECTORY="open-projects/github.com/hillwithsmallfields"
-MY_CONFIG_PROJECT="JCGS-config"
-MY_GITHUB_LIST="https://api.github.com/users/hillwithsmallfields/repos"
+MODEL_FILENAME = "/proc/device-tree/model"
 
 def file_has_line_starting(filename, incipit):
     with open(filename, 'r') as stream:
@@ -51,7 +56,7 @@ def append_if_missing(filename, incipit, addendum):
 def model():
     # https://gist.github.com/jperkin/c37a574379ef71e339361954be96be12
     # yields these (after the transformations we do):
-    # 
+    #
     # 2-Model-B
     # 3-Model-B
     # 3-Model-B Plus
@@ -63,19 +68,34 @@ def model():
     # Model-B Plus
     # Zero-W
     #
-    if os.path.isfile("/proc/device-tree/model"):
-        with open("/proc/device-tree/model") as model_stream:
+    if os.path.isfile(MODEL_FILENAME):
+        with open(MODEL_FILENAME) as model_stream:
             model_string = model_stream.read()
             found = re.search("Raspberry Pi (.+)( Rev.+ )?", model_string)
             return found.group(1).replace(' ', '-') if found else "unknown"
     else:
         return "not-a-pi"
 
+def set_hostname(newname):
+    with open("/etc/hostname", 'w') as namestream:
+        namestream.write(newname + '\n')
+    oldname = socket.gethostname()
+    if newname != oldname:
+        with open("/etc/hosts", 'r') as hoststream:
+            hosts = [host.replace(oldname, newname) for host in hoststream]
+        with open("/etc/hosts", 'w') as hoststream:
+            for host in hosts:
+                hoststream.write(host)
+
 def sh(command):
     print("Running command", command)
     os.system(command)
 
 def main():
+
+    if getpass.getuser() != 'root':
+        print("This program must be run as root")
+        sys.exit(1)
 
     parser = argparse.ArgumentParser()
     parser.add_argument("--user")
@@ -85,30 +105,33 @@ def main():
                         help="""Filename or URL (JSON) overriding built-in settings.
                         Command line --user, --name, and --host override this file.
                         If the string has % in it, the model of the Pi is substituted.
-                        Use %.1s to get a single digit or Z for Zero or C for 
+                        Use %.1s to get a single digit or Z for Zero or C for
                         Compute Module or M for the original model.""")
     args = parser.parse_args()
 
+    global configuration
     if args.configuration:
-        if '%' in configuration:
-            configuration %= model()
-        if args.configuration.startswith("https://") or args.configuration.startswith("http://"):
-            configuration = requests.get(configuration).json()
+        confname = args.configuration
+        if '%' in confname:
+            confname %= model()
+        if confname.startswith("https://") or confname.startswith("http://"):
+            configuration = requests.get(confname).json()
         else:
-            with open(args.configuration) as confstream:
+            with open(confname) as confstream:
                 configuration = json.load(confstream)
 
     for k, v in vars(args).items():
         if v:
             configuration[k] = v
 
-    if getpass.getuser() != 'root':
-        print("This program must be run as root")
-        sys.exit(1)
-
     home_directory = "/home/" + configuration['user']
 
-    sh("raspi-config nonint do_change_hostname " + configuration['host'])
+    set_hostname(configuration['host'])
+
+    hostname = socket.gethostname()
+    hostaddr = socket.gethostbyname(hostname)
+
+    print("Running on host", hostname, "at address", hostaddr)
 
     for package in configuration['apt_packages']:
         sh("apt-get install %s" % package)
@@ -121,41 +144,49 @@ def main():
         _ = pwd.getpwnam(configuration['user'])
     except KeyError:
         sh('adduser --disabled-password --gecos "%s" %s' % (configuration['name'], configuration['user']))
-    print("run passwd to set your password")
-    print("then on desktop, do this: ssh-copy-id -i ~/.ssh/mykey %s@%s" % (configuration['user'], configuration['host']))
+    print("run 'sudo passwd %s' to set your password" % configuration['user'])
+    print("then on desktop, do this: ssh-copy-id %s@%s" % (configuration['user'], configuration['host']))
 
     sh("ssh-keygen -A && update-rc.d ssh enable && invoke-rc.d ssh start") # from the insides of raspi-config
 
-    append_if_missing("/etc/sudoers", configuration['user'], "%s    ALL=(ALL:ALL) ALL\n" % configuration['user'])
+    append_if_missing("/etc/sudoers",
+                      configuration['user'],
+                      "%s    ALL=(ALL:ALL) ALL\n" % configuration['user'])
 
     # If there is an external disk attached, put it where I want it:
     drive = "/dev/sda1"
-    mountpoint = "/mnt/hdd0"
 
     if os.path.exists(drive):
         sh("umount " + drive)
-        append_if_missing("/etc/fstab", drive, "%s %s ext4 defaults 0 0\n" % (drive, mountpoint))
-        os.makedirs(mountpoint, 0o777, True)
+        append_if_missing("/etc/fstab",
+                          drive,
+                          "%s %s ext4 defaults 0 0\n" % (drive, configuration['mountpoint']))
+        os.makedirs(configuration['mountpoint'], 0o777, True)
         sh("mount " + drive)
-        if os.path.isdir(mountpoint):
-            for filename in glob.glob(mountpoint+"/*"):
-                os.symlink(os.path.join(home_directory, os.path.basename(filename)), filename)
+        if os.path.isdir(configuration['mountpoint']):
+            user_dir = os.path.join(configuration['mountpoint'] + "home" + configuration['user'])
+            if os.path.isdir(user_dir):
+                print("Linking user files from HDD")
+                for filename in glob.glob(user_dir+"/*"):
+                    os.symlink(os.path.join(home_directory, os.path.basename(filename)), filename)
 
     # Do the rest as the new user
     os.setuid(pwd.getpwnam(configuration['user'])[2])
 
-    projects_dir = os.path.join(home_directory, MY_PROJECTS_DIRECTORY)
+    projects_dir = os.path.join(home_directory, configuration['projects_directory'])
     os.makedirs(projects_dir)
     os.chdir(projects_dir)
-    for repo in requests.get(MY_GITHUB_LIST).json():
+    for repo in requests.get(configuration['github_list']).json():
         if not os.path.isdir(os.path.join(projects_dir, repo['name'])):
             sh("git clone " + repo['git_url'])
 
     # Now copy my dotfiles into place:
-    config_dir = os.path.join(projects_dir, MY_CONFIG_PROJECT)
+    config_dir = os.path.join(projects_dir, configuration['config_project'])
     for dot_file in configuration['dot_files']:
-        shutil.copy(os.path.join(config_dir, dot_file),
-                         os.path.join(home_directory, "." + dot_file))
+        origin = os.path.join(config_dir, dot_file)
+        if os.path.isfile(origin):
+            shutil.copy(origin,
+                        os.path.join(home_directory, "." + dot_file))
 
 if __name__ == "__main__":
     main()
