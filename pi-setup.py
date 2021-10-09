@@ -4,7 +4,7 @@
 
 # use ifconfig to get the address
 
-# curl https://raw.githubusercontent.com/hillwithsmallfields/JCGS-scripts/master/pi-setup.py | sudo python3 - --default_config --host shtogu
+# curl https://raw.githubusercontent.com/hillwithsmallfields/JCGS-scripts/master/pi-setup.py | sudo python3 - --default-config --host shtogu
 
 import argparse
 import getpass
@@ -229,9 +229,9 @@ def main():
         uid = udata[2]
         gid = udata[3]
         print("Doing rest of setup as user %s (uid %d, gid %d)"% (user, uid, gid))
+        os.setgid(gid)          # can't do this after the setuid, because of not being root any longer
         os.setuid(uid)
         # os.seteuid(uid)
-        os.setgid(gid)
         # os.setegid(gid)
     else:
         print("User not specified, so completing setup as root")
