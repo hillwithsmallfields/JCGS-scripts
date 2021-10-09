@@ -48,10 +48,19 @@ def file_has_line_starting(filename, incipit):
     with open(filename, 'r') as stream:
         return any((line.startswith(incipit) for line in stream))
 
-def append_if_missing(filename, incipit, addendum):
+def append_to_file_if_missing(filename, incipit, addendum):
     if not file_has_line_starting(filename, incipit):
         with open(filename, 'a') as contents:
             contents.write(addendum)
+
+def append_to_line_starting(filename, incipit, addendum):
+    with open(filename, 'r') as stream:
+        lines = [line for line in stream]
+    with open(filename, 'w') as stream:
+        for line in lines:
+            if line.startswith(incipit):
+                line = line[:-1] + addendum + line[-1]
+            stream.write(line)
 
 def model():
     # https://gist.github.com/jperkin/c37a574379ef71e339361954be96be12
@@ -78,7 +87,7 @@ def model():
 def set_hostname(newname):
     with open("/etc/hostname", 'w') as namestream:
         namestream.write(newname + '\n')
-    oldname = socket.gethostname()
+        oldname = socket.gethostname()
     if newname != oldname:
         with open("/etc/hosts", 'r') as hoststream:
             hosts = [host.replace(oldname, newname) for host in hoststream]
@@ -97,14 +106,19 @@ def add_user(user):
         _ = pwd.getpwnam(user)
     except KeyError:
         sh('adduser --disabled-password --gecos "%s" %s' % (configuration['name'], user))
-    print("run 'sudo passwd %s' to set your password" % user)
-    print("then on desktop, do this: ssh-copy-id %s@%s" % (user, configuration['host']))
+        print("run 'sudo passwd %s' to set your password" % user)
+        print("then on desktop, do this: ssh-copy-id %s@%s" % (user, configuration['host']))
 
     sh("ssh-keygen -A && update-rc.d ssh enable && invoke-rc.d ssh start") # from the insides of raspi-config
 
-    append_if_missing("/etc/sudoers",
-                      user,
-                      "%s    ALL=(ALL:ALL) ALL\n" % user)
+    append_to_file_if_missing("/etc/sudoers",
+                              user,
+                              "%s    ALL=(ALL:ALL) ALL\n" % user)
+
+    append_to_line_starting("/etc/group",
+                            "gpio",
+                            "," + user)
+
     return user
 
 def sh(command):
@@ -191,9 +205,9 @@ def main():
     if ext_disk and os.path.exists(ext_disk) and mount_point:
         print("Moving", ext_disk, "to mount point", mount_point)
         sh("umount " + ext_disk)
-        append_if_missing("/etc/fstab",
-                          ext_disk,
-                          "%s %s ext4 defaults 0 0\n" % (ext_disk, mount_point))
+        append_to_file_if_missing("/etc/fstab",
+                                  ext_disk,
+                                  "%s %s ext4 defaults 0 0\n" % (ext_disk, mount_point))
         os.makedirs(mount_point, dirmask, True)
         sh("mount " + ext_disk)
         if os.path.isdir(mount_point):
@@ -201,7 +215,9 @@ def main():
             if os.path.isdir(user_dir):
                 print("Linking user files in", user_dir, "from HDD")
                 for filename in glob.glob(user_dir+"/*"):
-                    os.symlink(os.path.join(home_directory, os.path.basename(filename)), filename)
+                    link = os.path.join(home_directory, os.path.basename(filename))
+                    print("  Linking", link, "to", filename)
+                    os.symlink(filename, link)
         else:
             print("No directory found at mount point", mount_point)
     else:
@@ -220,9 +236,14 @@ def main():
     else:
         print("User not specified, so completing setup as root")
 
+    # This should be relative to the user's home directory, or absolute
+    # (avoiding any confusing about using $HOME as this program runs as
+    # root until it changes uid).
     projects_dir_name = configuration.get('projects-directory')
     if projects_dir_name:
-        projects_dir = os.path.join(home_directory, projects_dir_name)
+        projects_dir = (projects_dir_name
+                        if projects_dir_name.startswith('/')
+                        else os.path.join(home_directory, projects_dir_name))
         os.makedirs(projects_dir)
         os.chdir(projects_dir)
         print("Cloning projects into", projects_dir)
@@ -244,7 +265,13 @@ def main():
                                 os.path.join(home_directory, "." + dot_file))
 
     repos = configuration.get('git-repos')
-    repos_directory = configuration.get('repos-directory')
+    # This should be relative to the user's home directory, or absolute
+    # (avoiding any confusing about using $HOME as this program runs as
+    # root until it changes uid).
+    repos_dir_name = configuration.get('repos-directory')
+    repos_directory = (repos_dir_name
+                       if repos_dir_name.startswith('/')
+                       else os.path.join(home_directory, repos_dir_name))
 
     if repos and repos_directory:
         repos_directory = os.path.expandvars(repos_directory)
