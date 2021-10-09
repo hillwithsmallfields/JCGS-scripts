@@ -214,9 +214,9 @@ def main():
         gid = udata[3]
         print("Doing rest of setup as user %s (uid %d, gid %d)"% (user, uid, gid))
         os.setuid(uid)
-        os.seteuid(uid)
+        # os.seteuid(uid)
         os.setgid(gid)
-        os.setegid(gid)
+        # os.setegid(gid)
     else:
         print("User not specified, so completing setup as root")
 
