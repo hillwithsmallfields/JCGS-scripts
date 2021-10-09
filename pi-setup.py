@@ -70,8 +70,7 @@ def model():
     #
     if os.path.isfile(MODEL_FILENAME):
         with open(MODEL_FILENAME) as model_stream:
-            model_string = model_stream.read()
-            found = re.search("Raspberry Pi (.+)( Rev.+ )?", model_string)
+            found = re.search("Raspberry Pi (.+)( Rev.+ )?", model_stream.read())
             return found.group(1).replace(' ', '-') if found else "unknown"
     else:
         return "not-a-pi"
@@ -158,7 +157,7 @@ def main():
     if confname:
         if '%' in confname:
             confname %= model()
-        if confname.startswith("https://") or confname.startswith("http://"):
+        if confname.split(':', 1)[0] in ('https', 'http'):
             configuration = requests.get(confname).json()
         else:
             with open(confname) as confstream:
@@ -183,6 +182,7 @@ def main():
 
     user = add_user(configuration.get('user'))
     home_directory = os.path.join("/home", user)
+    print("Using", home_directory, "as home directory")
 
     # If there is an external disk attached, put it where I want it:
     ext_disk = configuration.get('ext-drive')
@@ -199,14 +199,26 @@ def main():
         if os.path.isdir(mount_point):
             user_dir = os.path.join(mount_point, "home", user)
             if os.path.isdir(user_dir):
-                print("Linking user files from HDD")
+                print("Linking user files in", user_dir, "from HDD")
                 for filename in glob.glob(user_dir+"/*"):
                     os.symlink(os.path.join(home_directory, os.path.basename(filename)), filename)
+        else:
+            print("No directory found at mount point", mount_point)
+    else:
+        print("No external disk found")
 
     # Do the rest as the new user
     if user:
-        print("Doing rest of setup as", user)
-        os.setuid(pwd.getpwnam(user)[2])
+        udata = pwd.getpwnam(user)
+        uid = udata[2]
+        gid = udata[3]
+        print("Doing rest of setup as user %s (uid %d, gid %d)"% (user, uid, gid))
+        os.setuid(uid)
+        os.seteuid(uid)
+        os.setgid(gid)
+        os.setegid(gid)
+    else:
+        print("User not specified, so completing setup as root")
 
     projects_dir_name = configuration.get('projects-directory')
     if projects_dir_name:
@@ -236,6 +248,7 @@ def main():
 
     if repos and repos_directory:
         repos_directory = os.path.expandvars(repos_directory)
+        print("Fetching %s into %s", repos, repos_directory)
         for repo in repos:
             # assuming github-style naming:
             repo_name_parts = repo.split("/")
