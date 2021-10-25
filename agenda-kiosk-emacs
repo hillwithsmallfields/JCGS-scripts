@@ -15,7 +15,7 @@
 # This does the same as agenda-monitor-emacs, and adds the kiosk-style
 # functionality.
 
-if [ ! -v EMACS ]
+if [ ! -v MY_ELISP ]
 then
     . $HOME/.bash_profile
 fi
