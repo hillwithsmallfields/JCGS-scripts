@@ -1,0 +1,4 @@
+#!/bin/bash
+
+sudo cryptsetup luksOpen /dev/sda3 crypted
+sudo mount /dev/mapper/crypted /mnt/crypted/

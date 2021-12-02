@@ -1,0 +1,4 @@
+#!/bin/bash
+
+sudo umount /mnt/crypted/
+sudo cryptsetup luksClose crypted
