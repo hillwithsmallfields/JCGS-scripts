@@ -1,0 +1,15 @@
+#!/bin/bash
+DRIVE=/dev/sdd
+AFTERDRIVE=/dev/sde
+
+if [ -b $AFTERDRIVE ]
+then
+    echo /dev/sdd is not the last drive
+    exit 1
+fi
+
+IMAGEDIR=$HOME/isos/distro-installs/
+IMAGE=2021-10-30-raspios-bullseye-armhf-full.img
+
+sudo umount ${DRIVE}*
+sudo dd bs=4M status=progress if=$IMAGEDIR/$IMAGE of=$DRIVE
