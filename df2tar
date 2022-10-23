@@ -86,7 +86,8 @@ mkdir -p $SCRATCH
 # When run, this installs pip, and then performs the essential actions
 # of the input dockerfile.
 mkdir -p $SCRATCH/tmp
-ACTIONS=$SCRATCH/tmp/actions
+ACTIONFILE=/tmp/actions
+ACTIONS=$SCRATCH$ACTIONFILE
 cat > $ACTIONS <<EOF
 #!/bin/bash
 apt-get install --yes python3-pip
@@ -142,10 +143,22 @@ personality=linux
 preserve-environment=true
 EOF
 
+# For debugging, list the available chroots
+echo Available chroots are:
+schroot --list
+
+# Current bug:
+# It is running what appears to be a chroot but it's in the main filesystem... it was in the proper place when I was trying it manually, and I think in the first few scripted runs
+
 # Now run all the installers inside the chroot.
 
 echo Running install script inside chroot
-schroot -c build bash
+
+# What I want to do:
+# schroot -c build $ACTIONFILE
+
+# What I'm doing for debugging
+schroot -c build --directory $HOME bash
 
 echo Umounting the build unionfs
 umount $MOUNTPOINT
