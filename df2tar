@@ -1,0 +1,165 @@
+#!/bin/bash
+
+# Runs a dockerfile as a shell script inside a chroot jail with an
+# overlayfs, so any installations it does go into the writable layer.
+# Then makes a tarball of the writable layer.
+
+# Uses https://github.com/devgateway/dkr2sh.git to convert the
+# dockerfile to a shell script.
+
+# This script must be run as root
+
+if [ $USER != root ]
+then
+    echo This script must be run as root
+    exit 1
+fi
+
+TARBALL=installation.tgz
+BASEDIR=/srv/buildbase
+FRESH=false
+AUX=/tmp/aux
+
+while true
+do
+  case $1 in
+    --fresh)    FRESH=true
+                shift
+                ;;
+    --output)   TARBALL=$2
+                shift 2
+                ;;
+    --base)     BASEDIR=$2
+                shift 2
+                ;;
+    --aux)      AUX=$2
+                shift 2;
+                ;;
+    *)          break
+                ;;
+  esac
+done
+
+DOCKERFILE=${1-DOCKERFILE}
+if [ ! -f $DOCKERFILE ]
+then
+    echo No Dockerfile specified
+    exit 1
+fi
+
+if [ ! -d $BASEDIR/bin ]
+then
+    FRESH=true
+fi
+
+if $FRESH
+then
+    # Make a little Debian directory tree.
+
+    # This contains enough to run apt-get, which we will use to
+    # install pip.  From there, we can install the software we want
+    # for our application container.
+    echo Making fresh base dir $BASEDIR
+    rm -rf $BASEDIR
+    mkdir -p $BASEDIR
+    /sbin/debootstrap stable $BASEDIR http://deb.debian.org/debian
+    echo Made base dir $BASEDIR
+fi
+
+echo Base directory $BASEDIR contains:
+ls -l $BASEDIR
+
+# Make an empty directory to overlay the base directory with.
+
+# This will be used as the writable layer for the installations that
+# the translated dockerfile will do, and when all the installations
+# have been done, will be tarred up for unbundling at the destination,
+# which will have the effect of replicating all the installations done
+# by the dockerfile.
+
+SCRATCH=/srv/buildscratch
+rm -rf $SCRATCH
+mkdir -p $SCRATCH
+
+# Build the install script.
+
+# When run, this installs pip, and then performs the essential actions
+# of the input dockerfile.
+mkdir -p $SCRATCH/tmp
+ACTIONS=$SCRATCH/tmp/actions
+cat > $ACTIONS <<EOF
+#!/bin/bash
+apt-get install --yes python3-pip
+EOF
+# Get a script we need for this:
+CONVERTER=$AUX/dkr2sh/dkr2sh.sed
+if [ ! -f $CONVERTER ]
+then
+    mkdir -p $AUX
+    pushd $AUX
+    git clone https://github.com/devgateway/dkr2sh.git
+    popd
+fi
+$CONVERTER < $DOCKERFILE >> $ACTIONS
+chmod a+x $ACTIONS
+
+echo Actions in $ACTIONS are:
+echo ::::::::::::
+cat $ACTIONS
+echo ::::::::::::
+
+# Set up a union mount.
+
+# This is a two-layer file system, with the top (writable) layer
+# starting off with an (almost) empty directory, into which the
+# installations will be done, and the bottom (read-only) layer
+# containing the installers and enough of the OS binaries and
+# libraries to run them.
+
+# The top layer initially contains the action script but that's all; I
+# didn't want to put that in the base directory tree as I want to
+# treat the latter as immutable.
+
+MOUNTPOINT=/srv/build
+rm -rf $MOUNTPOINT
+mkdir -p $MOUNTPOINT
+unionfs -o cow $SCRATCH=RW:$BASEDIR=RO $MOUNTPOINT
+
+echo Set up union FS at $MOUNTPOINT
+ls $MOUNTPOINT
+echo /tmp inside mountpoint:
+ls -l $MOUNTPOINT/tmp
+
+# Set up stuff that the schroot command needs.
+
+cat > /etc/schroot/chroot.d/build <<EOF
+[build]
+description=A place to build tarballs
+type=directory
+directory=$MOUNTPOINT
+users=$USER
+personality=linux
+preserve-environment=true
+EOF
+
+# Now run all the installers inside the chroot.
+
+echo Running install script inside chroot
+schroot -c build bash
+
+echo Umounting the build unionfs
+umount $MOUNTPOINT
+
+# Tidy up the results directory.
+
+rm $ACTIONS
+echo Scratch directory now contains:
+ls -l $SCRATCH
+
+# Convert the results directory to a tarball, suitable for unpacking
+# in / on the target system.
+
+tar --directory /srv/$SCRATCH --create --gzip --file $TARBALL .
+
+echo Created tarred installation in $TARBALL
+ls -l $TARBALL
