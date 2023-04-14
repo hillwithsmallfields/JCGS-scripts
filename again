@@ -19,5 +19,6 @@ cat output/stdout output/stderr
 
 mv output tries/$COMMIT/
 
+# TODO: make this conditional on the previous directory existing
 diff -r tries/$COMMIT/output tries/$PREV_COMMIT/output > tries/$COMMIT/output.diff
 git diff $PREV_COMMIT $COMMIT > tries/$COMMIT/code.diff
