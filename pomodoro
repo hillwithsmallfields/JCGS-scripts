@@ -9,3 +9,9 @@ then
 fi
 eom $(randimage $GALLERY) &
 echo $(date --iso-8601=minutes) $* >> $POMODORO_LOG
+SOUND=$(randimage $HOME/Music)
+case $SOUND in
+    *.ogg) ogg123 -K 30 $SOUND ;;
+    *.mp3) mpg123 -N 30 $SOUND ;;
+    *) ;;
+esac
