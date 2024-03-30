@@ -1,2 +1,2 @@
 #!/bin/bash
-make_link_table.py --output ~/private_html/startpage.html --stylesheet ~/common/org/startpage.css ~/common/org/startpage.yaml
+$MY_PROJECTS/tabular_page_maker/src/tabular_page_maker/make_link_table.py --output ~/private_html/startpage.html --stylesheet $SYNCED/org/startpage.css $SYNCED/org/startpage.yaml
