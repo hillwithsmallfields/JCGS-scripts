@@ -1,16 +1,39 @@
 #!/bin/bash
 # Usual things to start, that aren't quite predictable enough to start automatically
 HOST=`hostname`
+
+
+function startprogs() {
+    for PROGRAM in $PROGS
+    do
+        if ps aux | grep -v grep | grep -s $PROGRAM
+        then
+            echo $PROGRAM already running
+        else
+            echo $PROGRAM not running, starting it
+            $PROGRAM &
+        fi
+    done
+}
+
+function startsync() {
+    while true
+    do
+	if ps aux | grep -v grep | grep -s firefox-esr
+	then
+	    sleep 10
+	    syncthing &
+	    break
+	fi
+	sleep 1
+    done
+}
+
 case $HOST in
-  isaiah) sudo echo -n "Time now "; date
-	  read -p "Shut down at: " SHUTDOWNTIME
-	  echo $SHUTDOWNTIME > /tmp/shutdowntime
-	  sudo /sbin/shutdown -h -P $SHUTDOWNTIME &
-	  ssh-add; pullrepos
-	  pullorg
-	  .dropbox-dist/dropboxd &
-          firefox &
-	  ;;
-  *)      echo No usual setup known for this host
-          ;;
+    isaiah) PROGS="emacs firefox-esr gimp google-chrome-stable josm keepass2 kicad swell-foop"
+            startprogs
+	    startsync
+            ;;
+    *)      echo No usual setup known for this host
+            ;;
 esac
