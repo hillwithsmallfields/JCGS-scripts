@@ -30,7 +30,7 @@ function startsync() {
 }
 
 case $HOST in
-    isaiah) PROGS="emacs firefox-esr gimp google-chrome-stable josm keepass2 kicad swell-foop"
+    isaiah) PROGS="emacs firefox-esr gimp google-chrome-stable josm keepass2 kicad libreoffice swell-foop zoom"
             startprogs
 	    startsync
             ;;
