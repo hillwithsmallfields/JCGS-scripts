@@ -1,3 +1,0 @@
-#! /bin/sh
-THESISCODE=$SYNC/research/PhD/platypus89/*.lisp
-wc -c -l $THESISCODE $SYNC/emacs/.emacs $SYNC/emacs/*.el $SYNC/emacs/[^_]*/*.el $SYNC/emacs/[^_]*/*/*.el $SYNC/open-projects/emacs-versor/lisp/*.el $SYNC/open-projects/sidebrain/lisp/*.el $SYNC/open-projects/mulvoc/mulvoc/lisp/*.el $SYNC/open-projects/WikiRoads/wikiroads/src/*.c $SYNC/open-projects/WikiRoads/wikiroads/src/*.h $SYNC/www/research/PhD/mandelbrot.txt | tail -n 1

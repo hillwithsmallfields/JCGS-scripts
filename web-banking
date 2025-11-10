@@ -1,2 +1,0 @@
-#!/bin/bash
-epiphany-browser ~/common/local-www/banking-index.html &
