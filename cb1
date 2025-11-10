@@ -1,3 +1,0 @@
-#!/bin/bash
-# ssh -l john.cb1.com -p 20022 mail.cb1.com
-ssh -l john.cb1.com -p 20022 cb1.com
