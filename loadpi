@@ -9,7 +9,7 @@ then
 fi
 
 IMAGEDIR=$HOME/isos/distro-installs/
-IMAGE=2021-10-30-raspios-bullseye-armhf-full.img
+IMAGE=2023-12-05-raspios-bookworm-arm64-full.img
 
 sudo umount ${DRIVE}*
 sudo dd bs=4M status=progress if=$IMAGEDIR/$IMAGE of=$DRIVE

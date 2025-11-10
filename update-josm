@@ -1,4 +1,7 @@
 #!/bin/bash
 cd $HOME/mapping
-mv josm-tested.jar josm-tested-old.jar
+if [ -f josm-tested.jar ]
+then
+    mv josm-tested.jar josm-tested-old.jar
+fi
 wget https://josm.openstreetmap.de/josm-tested.jar

@@ -1,0 +1,22 @@
+#!/usr/bin/env python3
+
+import os
+import exif
+
+def photodate(filename):
+    """Return the date when a photo was taken."""
+    with open(filename, 'rb') as istr:
+        image_data = exif.Image(istr)
+        # print(filename, image_data.list_all())
+        return (image_data.datetime_original
+                if hasattr(image_data, 'datetime_original')
+                else 0)
+
+def photodates(directory):
+    return sorted([(filename, photodate(filename))
+                 for filename in os.listdir(directory)
+                 if filename.endswith(".jpg")],
+                  key=lambda name_date: name_date[1])
+
+if __name__ == "__main__":
+    print(photodates(".")[-1])
