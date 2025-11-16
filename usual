@@ -21,7 +21,7 @@ function startsync() {
     do
 	if ps aux | grep -v grep | grep -s firefox-esr
 	then
-	    sleep 30
+	    sleep 60
 	    syncthing &
 	    break
 	fi
