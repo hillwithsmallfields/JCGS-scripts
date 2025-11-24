@@ -1,0 +1,18 @@
+#!/bin/bash
+mkdir -p $MY_PROJECTS
+cd $MY_PROJECTS
+for REPO in $(curl https://api.github.com/users/hillwithsmallfields/repos | jq "map(.clone_url)[]" | sed -e s/\"//g)
+do
+    DIRNAME=$MY_PROJECTS/$(basename --s .git $REPO)
+    # echo got repo $REPO and dirname $DIRNAME
+    if [[ -d $DIRNAME ]]
+    then
+	echo $DIRNAME already exists, updating
+	pushd $DIRNAME
+  	git pull
+	popd
+    else
+	echo $DIRNAME not present, will fetch $REPO
+	git clone $REPO
+    fi
+done
