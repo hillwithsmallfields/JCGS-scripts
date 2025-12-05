@@ -1,8 +1,0 @@
-#!/bin/bash
-DIRECTORIES="$EHOME/common/* $EHOME/Dropbox/* $EHOME/library"
-SERVER=${1-$HOMESERVER}
-SERVERMOUNT=/nfs/whinberry
-SERVERDIR=/mnt/usbmem
-
-echo Updating $HOME/common into $SERVERUSER@$SERVER:/mnt/usbmem/common on $SERVER via ssh on port $HOMESERVERSSHPORT
-rsync -uaCvz -e "ssh -p $HOMESERVERSSHPORT" $HOME/common/ $SERVERUSER@$SERVER:/mnt/usbmem/common

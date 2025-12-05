@@ -1,3 +1,0 @@
-#!/bin/bash
-cd $GATHERED/wiktionary
-curl -s -O http://en.wiktionary.org/wiki/$1

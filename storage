@@ -1,0 +1,3 @@
+#!/bin/bash
+
+$MY_PROJECTS/coimealta/src/coimealta/inventory/storage.py $*

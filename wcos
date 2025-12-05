@@ -1,3 +1,0 @@
-#! /bin/sh
-THESISCODE=$COMMON/research/PhD/platypus89/*.lisp
-wc -c -l $THESISCODE $COMMON/emacs/.emacs $COMMON/emacs/*.el $COMMON/emacs/[^_]*/*.el $COMMON/emacs/[^_]*/*/*.el $COMMON/open-projects/emacs-versor/lisp/*.el $COMMON/open-projects/sidebrain/lisp/*.el $COMMON/open-projects/mulvoc/mulvoc/lisp/*.el $COMMON/open-projects/WikiRoads/wikiroads/src/*.c $COMMON/open-projects/WikiRoads/wikiroads/src/*.h $COMMON/www/research/PhD/mandelbrot.txt | tail -n 1

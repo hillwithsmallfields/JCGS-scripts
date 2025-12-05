@@ -1,7 +1,9 @@
 #!/bin/bash
 
+# usage: backup-confidential me@example.com [directory]
+
 PLAINTEXT_TARBALL=personal-$(date --iso-8601=date).tgz  # keep this in the encrypted directory
-CYPHERTEXT_DIRECTORY=/tmp
+CYPHERTEXT_DIRECTORY=${2-/tmp}
 CYPHERTEXT_TARBALL=$CYPHERTEXT_DIRECTORY/$PLAINTEXT_TARBALL.gpg
 
 cd /mnt/crypted/$USER
