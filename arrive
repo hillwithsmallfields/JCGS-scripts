@@ -1,5 +1,5 @@
 #!/bin/bash
-# sudo apt-get install jq git emacs openscad kicad python3-pip timidity lilypond music123 vorbis-tools
+sudo apt-get install jq git emacs openscad kicad python3-pip timidity lilypond music123 vorbis-tools
 sudo pip3 install ordered_set sexpdata pyyaml oura measurement python-decouple overpass2 webpy pycrypto
 MYOP=${OPEN_PROJECTS-$HOME/open-projects/github/hillwithsmallfields}
 mkdir -p $MYOP
