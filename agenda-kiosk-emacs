@@ -3,22 +3,15 @@
 # Run my Emacs agenda system in a "kiosk" style.
 #
 # This lets you move around the agenda tree, and mark things as done,
-# using just a "numeric" keypad.  I plan to build a Raspberry Pi
-# running this into a noticeboard, so my "things to do" lists can live
-# alongside real paper notices about things.
+# using just a "numeric" keypad.  This runs on a Raspberry Pi built
+# into a noticeboard, so my "things to do" lists can live alongside
+# real paper notices about things.
 #
 # The emacs part of this project is within
 # https://github.com/hillwithsmallfields/JCGS-emacs, and the cutouts
 # for screen and keypad in the noticeboard at
 # https://github.com/hillwithsmallfields/cnc-things/tree/master/notice-board
 
-# This does the same as agenda-monitor-emacs, and adds the kiosk-style
-# functionality.
-
-if [ ! -v MY_ELISP ]
-then
-    . $HOME/.bash_profile
-fi
 while [ ! -f /tmp/stop-agenda-kiosk ]
 do
     if [ -x /usr/local/bin/emacs ]
@@ -29,6 +22,5 @@ do
     fi
     echo Using $EMACSBIN as emacs
     $EMACSBIN -q -l $MY_ELISP/special-setups/tasks/org-agenda-kiosk.el -f org-agenda-kiosk
-    rm -f /tmp/restart-agenda-kiosk
 done
 rm -f /tmp/stop-agenda-kiosk
