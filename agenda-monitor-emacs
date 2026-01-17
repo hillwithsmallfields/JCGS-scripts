@@ -1,9 +1,0 @@
-#!/bin/bash
-if [ ! -v EMACS ]
-then
-    . $HOME/.bash_profile
-fi
-
-# All this, and more, is done by the script agenda-kiosk-emacs
-
-emacs -q -l $MY_ELISP/special-setups/tasks/tasks-emacs-setup.el -f jcgs/org-agenda-monitor-start
