@@ -35,5 +35,5 @@ if os.path.isdir(USB_KEY):
             if not os.path.exists(to_filename):
                 shutil.copy(from_filename, to_filename)
                 continue
-            if os.stat(from_filename).st_mtime > os.stat(to_filename):
+            if os.stat(from_filename).st_mtime > os.stat(to_filename).st_mtime:
                 shutil.copy(from_filename, to_filename)
