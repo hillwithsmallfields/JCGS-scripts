@@ -1,0 +1,39 @@
+#!/usr/bin/env python3
+
+import os
+import shutil
+
+PADDING = "\n" * 4096
+OUTPUT_DIR = os.path.expandvars("$SYNCED/cnc-scratch")
+USB_KEY = "/media/jcgs/KINGSTON"
+
+for dirpath, _dirnames, filenames in os.walk(os.path.expandvars("$MY_PROJECTS")):
+    if "site-packages" in dirpath:
+        continue
+    group = os.path.split(dirpath)[-1]
+    for fname in filenames:
+        filename = os.path.join(dirpath, fname)
+        outfilename = os.path.join(OUTPUT_DIR, group, fname)
+        if filename.endswith(".dxf") and os.stat(filename).st_size < 4096:
+            print("Copying and padding", filename)
+            os.makedirs(os.path.join(OUTPUT_DIR, group), exist_ok=True)
+            with open(filename) as instream, open(outfilename, 'w') as outstream:
+                outstream.write(instream.read())
+                outstream.write(PADDING)
+        elif filename.endswith(".dxf") or filename.endswith(".svg"):
+            print("Copying", filename)
+            os.makedirs(os.path.join(OUTPUT_DIR, group), exist_ok=True)
+            shutil.copy(filename, outfilename)
+
+if os.path.isdir(USB_KEY):
+    for dirpath, _dirnames, filenames in os.walk(OUTPUT_DIR):
+        for fname in filenames:
+            from_filename = os.path.join(dirpath, fname)
+            group = os.path.split(dirpath)[-1]
+            to_filename = os.path.join(USB_KEY, group, fname)
+            os.makedirs(os.path.join(USB_KEY, group), exist_ok=True)
+            if not os.path.exists(to_filename):
+                shutil.copy(from_filename, to_filename)
+                continue
+            if os.stat(from_filename).st_mtime > os.stat(to_filename):
+                shutil.copy(from_filename, to_filename)
