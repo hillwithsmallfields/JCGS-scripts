@@ -1,0 +1,3 @@
+#!/bin/bash
+
+ssh -p $JCGS_PORT $JCGS_ME_UK
