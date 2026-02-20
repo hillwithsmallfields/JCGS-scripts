@@ -1,0 +1,13 @@
+#!/bin/bash
+
+CONFIGDIR=$MY_PROJECTS/JCGS-config
+TARGET=/etc/motion
+
+source $HOME/.bashrc_local
+
+cd $CONFIG_DIR
+git pull
+
+sudo envsubst < $CONFIGDIR/motion/motion.conf > $TARGET/motion.conf
+sudo envsubst < $CONFIGDIR/motion/camera1.conf > $TARGET/camera1.conf
+
