@@ -14,16 +14,20 @@ for dirpath, _dirnames, filenames in os.walk(os.path.expandvars("$MY_PROJECTS"))
     for fname in filenames:
         filename = os.path.join(dirpath, fname)
         outfilename = os.path.join(OUTPUT_DIR, group, fname)
-        if filename.endswith(".dxf") and os.stat(filename).st_size < 4096:
-            print("Copying and padding", filename)
-            os.makedirs(os.path.join(OUTPUT_DIR, group), exist_ok=True)
-            with open(filename) as instream, open(outfilename, 'w') as outstream:
-                outstream.write(instream.read())
-                outstream.write(PADDING)
-        elif filename.endswith(".dxf") or filename.endswith(".svg"):
-            print("Copying", filename)
-            os.makedirs(os.path.join(OUTPUT_DIR, group), exist_ok=True)
-            shutil.copy(filename, outfilename)
+        if ((filename.endswith(".dxf")
+             or filename.endswith(".svg"))
+            and (not os.path.exists(outfilename)
+                 or os.stat(filename).st_mtime > os.stat(outfilename).st_mtime)):
+            if filename.endswith(".dxf") and os.stat(filename).st_size < 4096:
+                print("Copying and padding", filename)
+                os.makedirs(os.path.join(OUTPUT_DIR, group), exist_ok=True)
+                with open(filename) as instream, open(outfilename, 'w') as outstream:
+                    outstream.write(instream.read())
+                    outstream.write(PADDING)
+            else:
+                print("Copying", filename)
+                os.makedirs(os.path.join(OUTPUT_DIR, group), exist_ok=True)
+                shutil.copy(filename, outfilename)
 
 if os.path.isdir(USB_KEY):
     for dirpath, _dirnames, filenames in os.walk(OUTPUT_DIR):
@@ -37,3 +41,5 @@ if os.path.isdir(USB_KEY):
                 continue
             if os.stat(from_filename).st_mtime > os.stat(to_filename).st_mtime:
                 shutil.copy(from_filename, to_filename)
+
+os.system("umount " + USB_KEY)
