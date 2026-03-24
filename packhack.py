@@ -21,7 +21,7 @@ def get_table(document, name):
     document[name] = tomlkit.table()
     return document[name]
 
-def firstname(package):
+def first_name(package):
     return package.split('.')[0] if '.' in package else package
 
 def packhackmain(name, directory="."):
@@ -44,23 +44,17 @@ def packhackmain(name, directory="."):
                     try:
                         for line in pystream:
                             if (m := re.search("from +([a-z_.0-9]+) +import", line)):
-                                dependencies.add(firstname(m.group(1)))
+                                dependencies.add(first_name(m.group(1)))
                             elif (m := re.search("import +([a-z_.0-9]+)", line)):
-                                dependencies.add(firstname(m.group(1)))
+                                dependencies.add(first_name(m.group(1)))
                     except UnicodeDecodeError as e:
                         print("could not scan python file", fullname, oe)
 
-    requirements = (dependencies - sys.stdlib_module_names) - set(sys.builtin_module_names)
-    print("found requirements:")
-    for r in sorted(requirements):
-        print("  ", r)
-    print("found provisions:")
-    for p in sorted(provisions):
-        print("  ", p)
-    unfulfilled = set(requirements - provisions)
-    print("unfulfilled requirements:")
-    for u in sorted(unfulfilled):
-        print("  ", u)
+    with open(os.path.join(directory, "requirements.txt"), 'w') as reqstream:
+        reqstream.write("\n".join(sorted(set(((dependencies
+                                               - sys.stdlib_module_names)
+                                              - set(sys.builtin_module_names))
+                                             - provisions))))
 
     tomlfile = os.path.join(directory, "pyproject.toml")
     if os.path.isfile(tomlfile):
@@ -85,8 +79,8 @@ def packhackmain(name, directory="."):
     build_system["requires"] = ["setuptools"]
     build_system["build-backend"] = "setuptools.build_meta"
 
-    # with open(tomlfile, 'w') as tom_stream:
-    #     tom_stream.write(tomlkit.dumps(pyproject))
+    with open(tomlfile, 'w') as tom_stream:
+        tom_stream.write(tomlkit.dumps(pyproject))
 
 if __name__ == "__main__":
     packhackmain(*get_args())
