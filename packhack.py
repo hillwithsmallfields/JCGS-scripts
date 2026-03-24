@@ -75,6 +75,47 @@ def packhackmain(name, directory="."):
         if k not in project:
             project[k] = v
 
+    version = project['version']
+    author_email = project['authors'][0]['email']
+    author_name = project['authors'][0]['name']
+
+    setup_name = os.path.join(directory, "setup.py")
+    setup = []
+    version_found = False
+    author_found = False
+    email_found = False
+    name_found = False
+    if os.path.isfile(setup_name):
+        with open(setup_name) as setup_stream:
+            for line in setup_stream:
+                if "name=" in line:
+                    name_found = True
+                    setup.append('    name="%s"\n' % name)
+                elif "version=" in line:
+                    version_found = True
+                    setup.append('    version="%s"\n' % version)
+                elif "author=" in line:
+                    author_found = True
+                    setup.append('    author="%s"\n' % author_name)
+                elif "author_email=" in line:
+                    email_found = True
+                    setup.append('    author_email="%s"\n' % author_email)
+                elif line.startswith(")"):
+                    if not name_found:
+                        setup.append('    name="%s"\n' % name)
+                    if not version_found:
+                        setup.append('    version="%s"\n' % version)
+                    if not author_found:
+                        setup.append('    author="%s"\n' % author_name)
+                    if not email_found:
+                        setup.append('    author_email="%s"\n' % author_email)
+                    setup.append(line)
+                else:
+                    setup.append(line)
+    # with open(setup_name, 'w') as setup_stream:
+    #     for line in setup:
+    #         setup_stream.write(line)
+
     build_system = get_table(pyproject, "build-system")
     build_system["requires"] = ["setuptools"]
     build_system["build-backend"] = "setuptools.build_meta"
