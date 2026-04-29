@@ -22,5 +22,7 @@ do
     fi
     echo Using $EMACSBIN as emacs
     $EMACSBIN -q -l $MY_ELISP/special-setups/tasks/org-agenda-kiosk.el -f org-agenda-kiosk
+    # remove the PID file
+    rm -f $HOME/.agenda-kiosk-emacs
 done
 rm -f /tmp/stop-agenda-kiosk
