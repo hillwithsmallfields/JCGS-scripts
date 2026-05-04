@@ -12,7 +12,9 @@
 # for screen and keypad in the noticeboard at
 # https://github.com/hillwithsmallfields/cnc-things/tree/master/notice-board
 
-while [ ! -f /tmp/stop-agenda-kiosk ]
+export STOP_KIOSK_FILE=/tmp/stop-agenda-kiosk
+
+while [ ! -f $STOP_KIOSK_FILE ]
 do
     if [ -x /usr/local/bin/emacs ]
     then
@@ -23,4 +25,4 @@ do
     echo Using $EMACSBIN as emacs
     $EMACSBIN -q -l $MY_ELISP/special-setups/tasks/org-agenda-kiosk.el -f org-agenda-kiosk
 done
-rm -f /tmp/stop-agenda-kiosk
+rm -f $STOP_KIOSK_FILE
