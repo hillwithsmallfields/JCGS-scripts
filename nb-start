@@ -1,0 +1,6 @@
+#!/bin/bash
+# Start my noticeboard environment
+
+syncthing &
+agenda-kiosk-emacs &
+$MY_PROJECTS//noticeboard/noticeboard &
