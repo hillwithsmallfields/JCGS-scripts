@@ -71,6 +71,11 @@ def packhackmain(name, directory=".", verbose=False, output_directory=None):
         for prov in sorted(provisions):
             print("   ", prov)
 
+    # TODO: make sure there are __init__.py files where needed
+    # TODO: check src/ and test/ layout?
+    # TODO: look at https://packaging.python.org/en/latest/discussions/src-layout-vs-flat-layout/
+    # TODO: look at https://packaging.python.org/en/latest/tutorials/packaging-projects/
+
     tomlfile = os.path.join(directory, "pyproject.toml")
     if os.path.isfile(tomlfile):
         with open(tomlfile) as tom_stream:
@@ -134,6 +139,7 @@ def packhackmain(name, directory=".", verbose=False, output_directory=None):
     build_system = get_table(pyproject, "build-system")
     build_system["requires"] = ["setuptools"]
     build_system["build-backend"] = "setuptools.build_meta"
+    # TODO: generate distribution archives: https://packaging.python.org/en/latest/tutorials/packaging-projects/#generating-distribution-archives
 
     with open(os.path.join(output_directory, "requirements.txt"), 'w') as reqstream:
         reqstream.write("\n".join(sorted(set(((dependencies
