@@ -8,11 +8,14 @@ import pwd
 import re
 import sys
 
+import git
 import tomlkit
 
 def get_args():
     parser = argparse.ArgumentParser()
     parser.add_argument("--directory", "-d", default=".")
+    parser.add_argument("--output-directory", "--output", "-o")
+    parser.add_argument("--verbose", "-v", action='store_true')
     return vars(parser.parse_args())
 
 def get_table(document, name):
@@ -24,12 +27,11 @@ def get_table(document, name):
 def first_name(package):
     return package.split('.')[0] if '.' in package else package
 
-def packhackmain(name, directory="."):
-    """Tidy up the packaging files in the current (or given) directory."""
-    directory = directory.removesuffix("/")
-    if not name:
-        name = os.path.basename(os.getcwd() if directory == "." else directory)
-
+def dependencies_and_provisions(directory):
+    """Look for everything we provide that could be imported, and for
+    everything we import, in all the python files in the directory
+    that aren't in the kind of subdirectories used by virtual
+    environments for installed packages."""
     dependencies = set()
     provisions = set()
     for dirpath, _, filenames in os.walk(directory):
@@ -49,12 +51,25 @@ def packhackmain(name, directory="."):
                                 dependencies.add(first_name(m.group(1)))
                     except UnicodeDecodeError as e:
                         print("could not scan python file", fullname, oe)
+    return dependencies, provisions
 
-    with open(os.path.join(directory, "requirements.txt"), 'w') as reqstream:
-        reqstream.write("\n".join(sorted(set(((dependencies
-                                               - sys.stdlib_module_names)
-                                              - set(sys.builtin_module_names))
-                                             - provisions))))
+def packhackmain(name, directory=".", verbose=False, output_directory=None):
+    """Tidy up the packaging files in the current (or given) directory."""
+    directory = directory.removesuffix("/")
+    if not output_directory:
+        output_directory = directory
+    if not name:
+        name = os.path.basename(os.getcwd() if directory == "." else directory)
+
+    dependencies, provisions = dependencies_and_provisions(directory)
+
+    if verbose:
+        print("Dependencies:")
+        for dep in sorted(dependencies):
+            print("   ", dep)
+        print("Provisions:")
+        for prov in sorted(provisions):
+            print("   ", prov)
 
     tomlfile = os.path.join(directory, "pyproject.toml")
     if os.path.isfile(tomlfile):
@@ -63,16 +78,19 @@ def packhackmain(name, directory="."):
     else:
         pyproject = tomlkit.document()
 
+    git_reader = git.Repo(".").config_reader()
+
     project = get_table(pyproject, "project")
     for k, v in {
-            'authors': [{'name': pwd.getpwuid(os.getuid()).pw_gecos.split(',')[0],
-                         'email': os.getenv("EMAIL")}],
+            'authors': [{'name': git_reader.get("user", "nameb") or pwd.getpwuid(os.getuid()).pw_gecos.split(',')[0],
+                         'email': git_reader.get("user", "email") or os.getenv("EMAIL")}],
             'license': "GPL-3.0-or-later",
             'version': "0.0.1",
             'name': name,
             'readme': "README.md" if os.path.isfile(os.path.join(directory, "README.md")) else "README",
     }.items():
         if k not in project:
+            print("adding property", k, "with value", v)
             project[k] = v
 
     version = project['version']
@@ -112,16 +130,21 @@ def packhackmain(name, directory="."):
                     setup.append(line)
                 else:
                     setup.append(line)
-    # with open(setup_name, 'w') as setup_stream:
-    #     for line in setup:
-    #         setup_stream.write(line)
 
     build_system = get_table(pyproject, "build-system")
     build_system["requires"] = ["setuptools"]
     build_system["build-backend"] = "setuptools.build_meta"
 
-    with open(tomlfile, 'w') as tom_stream:
+    with open(os.path.join(output_directory, "requirements.txt"), 'w') as reqstream:
+        reqstream.write("\n".join(sorted(set(((dependencies
+                                               - sys.stdlib_module_names)
+                                              - set(sys.builtin_module_names))
+                                             - provisions))))
+    with open(os.path.join(output_directory, "pyproject.toml"), 'w') as tom_stream:
         tom_stream.write(tomlkit.dumps(pyproject))
+    with open(os.path.join(output_directory, "setup.py"), 'w') as setup_stream:
+        for line in setup:
+            setup_stream.write(line)
 
 if __name__ == "__main__":
     packhackmain(*get_args())

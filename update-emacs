@@ -1,3 +1,0 @@
-#!/bin/bash
-cd $GATHERED/emacs-source
-cvs -z3 -d:pserver:anonymous@cvs.savannah.gnu.org:/sources/emacs update emacs

@@ -8,6 +8,7 @@ then
     source $SCRIPT_DIR/packhack.env/bin/activate
     pip install pipreqs
     pip install tomlkit
+    pip install build
     deactivate
     popd
 fi
@@ -15,3 +16,7 @@ fi
 source $SCRIPT_DIR/packhack.env/bin/activate
 
 $SCRIPT_DIR/packhack.py $*
+
+# cd whatever
+# python3 -m build
+# twine dist/*
