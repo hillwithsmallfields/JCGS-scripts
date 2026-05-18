@@ -6,6 +6,7 @@ import argparse
 import os
 import pwd
 import re
+import shutil
 import sys
 
 import git
@@ -15,6 +16,7 @@ def get_args():
     parser = argparse.ArgumentParser()
     parser.add_argument("--directory", "-d", default=".")
     parser.add_argument("--output-directory", "--output", "-o")
+    parser.add_argument("--copy", "-c")
     parser.add_argument("--verbose", "-v", action='store_true')
     parser.add_argument("--dummy", action='store_true')
     return vars(parser.parse_args())
@@ -46,9 +48,9 @@ def dependencies_and_provisions(directory):
                 with open(fullname) as pystream:
                     try:
                         for line in pystream:
-                            if (m := re.search("from +([a-z_.0-9]+) +import", line)):
+                            if (m := re.search("from +([A-Za-z_.0-9]+) +import", line)):
                                 dependencies.add(first_name(m.group(1)))
-                            elif (m := re.search("import +([a-z_.0-9]+)", line)):
+                            elif (m := re.search("import +([A-Za-z_.0-9]+)", line)):
                                 dependencies.add(first_name(m.group(1)))
                     except UnicodeDecodeError as e:
                         print("could not scan python file", fullname, oe)
@@ -56,20 +58,24 @@ def dependencies_and_provisions(directory):
 
 BUILD_DATA = {
     'setuptools': {
-        "requires": ["setuptools"],
-        "build-backend": "setuptools.build_meta"
+        'requires': ["setuptools"],
+        'build-backend': "setuptools.build_meta"
 
     }
 }
 
-def packhackmain(project_name,
+def packhackmain(project_name=None,
                  build_system='setuptools',
                  directory=".",
                  verbose=False,
                  dummy=False,
+                 copy=None,
                  output_directory=None):
     """Tidy up the packaging files in the current (or given) directory."""
     directory = directory.removesuffix("/")
+    if copy:
+        output_directory = copy
+        print("taking copy into", output_directory)
     if not output_directory:
         output_directory = directory
     if not project_name:
@@ -123,11 +129,6 @@ def packhackmain(project_name,
     author_name = project['authors'][0]['name']
 
     setup_name = os.path.join(directory, "setup.py")
-    setup = [
-        "from setuptools import setup, find_packages",
-        "",
-        "setup(",
-    ]
     version_found = False
     author_found = False
     email_found = False
@@ -146,8 +147,8 @@ def packhackmain(project_name,
                     version_found = True
                     version_from_setup = m.group(1)
                     if version_from_setup != project_name:
-                        print("Warning: project version mismatch: pyproject.toml says", version,
-                              "but setup.py says", version_from_setup)
+                        print("Warning: project version mismatch: pyproject.toml says", version, type(version),
+                              "but setup.py says", version_from_setup, type(version_from_setup))
                     setup.append('    version="%s"\n' % version_from_setup)
                 elif "author=" in line:
                     author_found = True
@@ -172,11 +173,16 @@ def packhackmain(project_name,
     build_system_table = get_table(pyproject, "build-system")
     if build_system:
         # force it to use the specified build system
+        print("using build system name", build_system)
+        print("using build system data", BUILD_DATA[build_system])
         for k, v in BUILD_DATA[build_system].items():
             build_system_table[k] = v
 
     # TODO: generate distribution archives: https://packaging.python.org/en/latest/tutorials/packaging-projects/#generating-distribution-archives
 
+    os.makedirs(output_directory, exist_ok=True)
+    if copy:
+        shutil.copytree(directory, output_directory, dirs_exist_ok=True, ignore=shutil.ignore_patterns(".git", "*~", "*.pyc"))
     with open(os.path.join(output_directory, "requirements.txt"), 'w') as reqstream:
         reqstream.write("\n".join(sorted(set(((dependencies
                                                - sys.stdlib_module_names)
@@ -185,20 +191,20 @@ def packhackmain(project_name,
     with open(os.path.join(output_directory, "pyproject.toml"), 'w') as tom_stream:
         tom_stream.write(tomlkit.dumps(pyproject))
     with open(os.path.join(output_directory, "setup.py"), 'w') as setup_stream:
-        setup_stream.write("\n".join(setup))
+        setup_stream.write("".join(setup))
 
     if not dummy:
         # TODO: call this directly in python
-        os.system(["python3", "-m", "build",
-                   # "--sdist",
-                   # "--wheel",
-                   directory])
+        os.system(" ".join(["python3", "-m", "build",
+                            # "--sdist",
+                            # "--wheel",
+                   directory]))
         # TODO: work out the package name
-        os.system(["python3", "-m", "twine", "upload",
-                   "dist/*"
-                   # os.path.join("dist", package_name + ".tar.gz"),
-                   # os.path.join("dist", package_name + "py3-none-any.whl"),
-                   )
+        os.system(" ".join(["python3", "-m", "twine", "upload",
+                            "dist/*"
+                            # os.path.join("dist", package_name + ".tar.gz"),
+                            # os.path.join("dist", package_name + "py3-none-any.whl"),
+                            ]))
 
 if __name__ == "__main__":
-    packhackmain(*get_args())
+    packhackmain(**get_args())
