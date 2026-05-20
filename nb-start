@@ -2,7 +2,10 @@
 # Start my noticeboard environment
 
 timedatectl set-ntp true
-motion -c /etc/motion/motion.conf
+firefox &
+sleep 30                        # syncthing will want the browser, so give it time to start
 syncthing &
+chromium &
+motion -c /etc/motion/motion.conf
 agenda-kiosk-emacs &
 $MY_PROJECTS/noticeboard/noticeboard
