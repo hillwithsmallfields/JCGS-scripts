@@ -1,6 +1,7 @@
 #!/bin/bash
 # Start my noticeboard environment
 
+timedatectl set-ntp true
 syncthing &
 agenda-kiosk-emacs &
 $MY_PROJECTS/noticeboard/noticeboard
