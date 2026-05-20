@@ -2,6 +2,7 @@
 # Start my noticeboard environment
 
 timedatectl set-ntp true
+motion -c /etc/motion/motion.conf
 syncthing &
 agenda-kiosk-emacs &
 $MY_PROJECTS/noticeboard/noticeboard
