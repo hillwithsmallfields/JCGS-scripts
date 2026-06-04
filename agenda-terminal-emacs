@@ -1,0 +1,5 @@
+#!/bin/bash
+
+# for calling from agenda-kiosk-emacs when the GUI emacs isn't working well
+
+$EMACSBIN -nw -q -l $MY_ELISP/special-setups/tasks/org-agenda-kiosk.el -f org-agenda-kiosk

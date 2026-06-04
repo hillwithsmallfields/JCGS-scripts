@@ -13,6 +13,9 @@
 # https://github.com/hillwithsmallfields/cnc-things/tree/master/notice-board
 
 export STOP_KIOSK_FILE=/tmp/stop-agenda-kiosk
+export EMACSBIN
+
+USE_TERMINAL=true
 
 while [ ! -f $STOP_KIOSK_FILE ]
 do
@@ -23,7 +26,12 @@ do
 	EMACSBIN=emacs
     fi
     echo Using $EMACSBIN as emacs
-    $EMACSBIN -q -l $MY_ELISP/special-setups/tasks/org-agenda-kiosk.el -f org-agenda-kiosk
+    if $USE_TERMINAL
+    then
+        xterm $SCRIPTS/agenda-terminal-emacs
+    else
+        $EMACSBIN -q -l $MY_ELISP/special-setups/tasks/org-agenda-kiosk.el -f org-agenda-kiosk
+    fi
     # remove the PID file
     rm -f $HOME/.agenda-kiosk-emacs
 done
