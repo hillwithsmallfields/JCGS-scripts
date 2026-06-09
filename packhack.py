@@ -10,6 +10,7 @@ import shutil
 import sys
 
 import git
+import semver
 import tomlkit
 
 def get_args():
@@ -113,7 +114,7 @@ def packhackmain(project_name=None,
             'authors': [{'name': git_reader.get("user", "name") or pwd.getpwuid(os.getuid()).pw_gecos.split(',')[0],
                          'email': git_reader.get("user", "email") or os.getenv("EMAIL")}],
             'license': '{file = "LICENSE"}' if os.path.isfile("LICENSE") else "GPL-3.0-or-later",
-            'version': "0.0.1",
+            'version': semver.Version(0, 0, 0),
             'name': project_name,
             'readme': "README.md" if os.path.isfile(os.path.join(directory, "README.md")) else "README",
             'dependencies': sorted(dependencies),
@@ -124,11 +125,12 @@ def packhackmain(project_name=None,
     # TODO: deduce project.scripts?
     # TODO: deduce classifiers?
 
-    version = project['version']
+    version = semver.Version.parse(project['version'])
     author_email = project['authors'][0]['email']
     author_name = project['authors'][0]['name']
 
     setup_name = os.path.join(directory, "setup.py")
+    setup = []
     version_found = False
     author_found = False
     email_found = False
@@ -145,7 +147,7 @@ def packhackmain(project_name=None,
                     setup.append('    name="%s"\n' % proj_name_from_setup)
                 elif (m := re.search('version="(.+)"', line)):
                     version_found = True
-                    version_from_setup = m.group(1)
+                    version_from_setup = semver.Version.parse(m.group(1))
                     if version_from_setup != project_name:
                         print("Warning: project version mismatch: pyproject.toml says", version, type(version),
                               "but setup.py says", version_from_setup, type(version_from_setup))
