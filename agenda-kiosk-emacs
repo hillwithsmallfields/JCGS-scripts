@@ -15,7 +15,7 @@
 export STOP_KIOSK_FILE=/tmp/stop-agenda-kiosk
 export EMACSBIN
 
-USE_TERMINAL=true
+USE_TERMINAL=false
 
 while [ ! -f $STOP_KIOSK_FILE ]
 do
