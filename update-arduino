@@ -1,0 +1,64 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
+if [[ ${EUID:-$(id -u)} -eq 0 ]]; then
+  printf 'Run this updater as your normal user, not with sudo.\n' >&2
+  exit 1
+fi
+
+api_url="https://api.github.com/repos/arduino/arduino-ide/releases/latest"
+app_dir="$HOME/Applications"
+appimage_path="$app_dir/arduino-ide-latest.AppImage"
+tmp_dir="$(mktemp -d)"
+trap 'rm -rf "$tmp_dir"' EXIT
+
+mkdir -p "$app_dir"
+
+release_json="$(curl -fsSL "$api_url")"
+version="$(jq -r '.tag_name' <<<"$release_json")"
+
+if ! asset_info="$(jq -er '
+  .assets
+  | map(select(.name | test("^arduino-ide_[0-9]+(\\.[0-9]+)*_Linux_64bit\\.AppImage$")))
+  | if length == 0 then empty else first | [.browser_download_url, (.digest // ""), .name] | @tsv end
+' <<<"$release_json")"; then
+  printf 'Could not find a Linux 64-bit Arduino IDE AppImage in the latest release.\n' >&2
+  exit 1
+fi
+
+IFS=$'\t' read -r appimage_url digest asset_name <<<"$asset_info"
+
+if [[ -z $appimage_url || -z $asset_name ]]; then
+  printf 'GitHub returned an incomplete AppImage asset record.\n' >&2
+  exit 1
+fi
+
+expected_hash=""
+if [[ $digest == sha256:* ]]; then
+  expected_hash="${digest#sha256:}"
+fi
+
+if [[ -n $expected_hash && -f $appimage_path ]]; then
+  read -r current_hash _ < <(sha256sum "$appimage_path")
+  if [[ $current_hash == "$expected_hash" ]]; then
+    printf 'Arduino IDE %s AppImage is already current.\n' "$version"
+    ls -lh "$appimage_path"
+    exit 0
+  fi
+fi
+
+tmp_file="$tmp_dir/$asset_name"
+printf 'Downloading Arduino IDE %s AppImage...\n' "$version"
+curl -fsSL --retry 3 --output "$tmp_file" "$appimage_url"
+
+if [[ -n $expected_hash ]]; then
+  printf '%s  %s\n' "$expected_hash" "$tmp_file" | sha256sum -c --status -
+  printf 'Checksum verified.\n'
+else
+  printf 'No SHA-256 digest was published for %s; skipping checksum verification.\n' "$asset_name" >&2
+fi
+
+install -m 0755 "$tmp_file" "$appimage_path"
+printf 'Installed %s\n' "$appimage_path"
+ls -lh "$appimage_path"
+
