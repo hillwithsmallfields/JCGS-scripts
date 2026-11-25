@@ -65,6 +65,104 @@ BUILD_DATA = {
     }
 }
 
+def read_pyproject(directory,
+                   dependencies,
+                   project_name=None,
+                   force_build_system=None):
+    """Read and return the data from pyroject.toml.
+    The results are the pyproject structure and a dictionary of details.
+    Missing fields are filled in heuristically."""
+    tomlfile = os.path.join(directory, "pyproject.toml")
+    if os.path.isfile(tomlfile):
+        with open(tomlfile) as tom_stream:
+            pyproject = tomlkit.parse(tom_stream.read())
+    else:
+        pyproject = tomlkit.document()
+
+    git_reader = git.Repo(".").config_reader()
+
+    project = get_table(pyproject, "project")
+    for k, v in {
+            'authors': [{'name': git_reader.get("user", "name") or pwd.getpwuid(os.getuid()).pw_gecos.split(',')[0],
+                         'email': git_reader.get("user", "email") or os.getenv("EMAIL")}],
+            'license': '{file = "LICENSE"}' if os.path.isfile("LICENSE") else "GPL-3.0-or-later",
+            'version': semver.Version(0, 0, 0),
+            'name': project_name,
+            'readme': "README.md" if os.path.isfile(os.path.join(directory, "README.md")) else "README",
+            'dependencies': sorted(dependencies),
+    }.items():
+        if k not in project:
+            print("adding property", k, "with value", v)
+            project[k] = v
+    # TODO: deduce project.scripts?
+    # TODO: deduce classifiers?
+
+    build_system_table = get_table(pyproject, "build-system")
+    if force_build_system:
+        # force it to use the specified build system
+        print("using build system name", force_build_system)
+        print("using build system data", BUILD_DATA[force_build_system])
+        for k, v in BUILD_DATA[force_build_system].items():
+            build_system_table[k] = v
+
+    return pyproject, {
+        'project': project,
+        'version': semver.Version.parse(project['version']),
+        'author_email': project['authors'][0]['email'],
+        'author_name': project['authors'][0]['name'],
+    }
+
+def read_setup_data(directory, project_name, toml_info):
+    """Read and return the data from setup.py.
+    The result is a list of text lines."""
+    setup_name = os.path.join(directory, "setup.py")
+    setup = []
+    version_found = False
+    author_found = False
+    email_found = False
+    name_found = False
+    if os.path.isfile(setup_name):
+        with open(setup_name) as setup_stream:
+            for line in setup_stream:
+                if (m := re.search('name="(.+)"', line)):
+                    name_found = True
+                    proj_name_from_setup = m.group(1)
+                    if proj_name_from_setup != project_name:
+                        print("Warning: project name mismatch: pyoproject.toml says", project_name,
+                              "but setup.py says", proj_name_from_setup)
+                    setup.append('    name="%s"\n' % proj_name_from_setup)
+                elif (m := re.search('version="(.+)"', line)):
+                    version_found = True
+                    version_from_setup = semver.Version.parse(m.group(1))
+                    version_from_toml = toml_info['version']
+                    print("version_from_toml", version_from_toml)
+                    print("version_from_setup", version_from_setup)
+                    print("project_name", project_name)
+                    if version_from_setup != version_from_toml:
+                        print("Warning: project version mismatch: pyproject.toml says", version_from_toml, type(version_from_toml),
+                              "but setup.py says", version_from_setup, type(version_from_setup))
+                    setup.append('    version="%s"\n' % version_from_setup)
+                # elif "author=" in line:
+                #     author_found = True
+                #     setup.append('    author="%s"\n' % author_name)
+                # elif "author_email=" in line:
+                #     email_found = True
+                #     setup.append('    author_email="%s"\n' % author_email)
+                # elif line.startswith(")"):
+                #     if not name_found:
+                #         setup.append('    name="%s"\n' % project_name)
+                #     if not version_found:
+                #         setup.append('    version="%s"\n' % version)
+                #     if not author_found:
+                #         setup.append('    author="%s"\n' % author_name)
+                #     if not email_found:
+                #         setup.append('    author_email="%s"\n' % author_email)
+                #     setup.append(line)
+                else:
+                    setup.append(line)
+    setup.append(")")
+    return setup
+
 def packhackmain(project_name=None,
                  build_system='setuptools',
                  directory=".",
@@ -100,85 +198,8 @@ def packhackmain(project_name=None,
     # DONE: look at https://realpython.com/pypi-publish-python-package/
     # TODO: go through https://packaging.python.org/en/latest/specifications/
 
-    tomlfile = os.path.join(directory, "pyproject.toml")
-    if os.path.isfile(tomlfile):
-        with open(tomlfile) as tom_stream:
-            pyproject = tomlkit.parse(tom_stream.read())
-    else:
-        pyproject = tomlkit.document()
-
-    git_reader = git.Repo(".").config_reader()
-
-    project = get_table(pyproject, "project")
-    for k, v in {
-            'authors': [{'name': git_reader.get("user", "name") or pwd.getpwuid(os.getuid()).pw_gecos.split(',')[0],
-                         'email': git_reader.get("user", "email") or os.getenv("EMAIL")}],
-            'license': '{file = "LICENSE"}' if os.path.isfile("LICENSE") else "GPL-3.0-or-later",
-            'version': semver.Version(0, 0, 0),
-            'name': project_name,
-            'readme': "README.md" if os.path.isfile(os.path.join(directory, "README.md")) else "README",
-            'dependencies': sorted(dependencies),
-    }.items():
-        if k not in project:
-            print("adding property", k, "with value", v)
-            project[k] = v
-    # TODO: deduce project.scripts?
-    # TODO: deduce classifiers?
-
-    version = semver.Version.parse(project['version'])
-    author_email = project['authors'][0]['email']
-    author_name = project['authors'][0]['name']
-
-    setup_name = os.path.join(directory, "setup.py")
-    setup = []
-    version_found = False
-    author_found = False
-    email_found = False
-    name_found = False
-    if os.path.isfile(setup_name):
-        with open(setup_name) as setup_stream:
-            for line in setup_stream:
-                if (m := re.search('name="(.+)"', line)):
-                    name_found = True
-                    proj_name_from_setup = m.group(1)
-                    if proj_name_from_setup != project_name:
-                        print("Warning: project name mismatch: pyproject.toml says", project_name,
-                              "but setup.py says", proj_name_from_setup)
-                    setup.append('    name="%s"\n' % proj_name_from_setup)
-                elif (m := re.search('version="(.+)"', line)):
-                    version_found = True
-                    version_from_setup = semver.Version.parse(m.group(1))
-                    if version_from_setup != project_name:
-                        print("Warning: project version mismatch: pyproject.toml says", version, type(version),
-                              "but setup.py says", version_from_setup, type(version_from_setup))
-                    setup.append('    version="%s"\n' % version_from_setup)
-                elif "author=" in line:
-                    author_found = True
-                    setup.append('    author="%s"\n' % author_name)
-                elif "author_email=" in line:
-                    email_found = True
-                    setup.append('    author_email="%s"\n' % author_email)
-                elif line.startswith(")"):
-                    if not name_found:
-                        setup.append('    name="%s"\n' % project_name)
-                    if not version_found:
-                        setup.append('    version="%s"\n' % version)
-                    if not author_found:
-                        setup.append('    author="%s"\n' % author_name)
-                    if not email_found:
-                        setup.append('    author_email="%s"\n' % author_email)
-                    setup.append(line)
-                else:
-                    setup.append(line)
-    setup.append(")")
-
-    build_system_table = get_table(pyproject, "build-system")
-    if build_system:
-        # force it to use the specified build system
-        print("using build system name", build_system)
-        print("using build system data", BUILD_DATA[build_system])
-        for k, v in BUILD_DATA[build_system].items():
-            build_system_table[k] = v
+    pyproject, toml_info = read_pyproject(directory, dependencies, project_name, build_system)
+    setup_info = read_setup_data(directory, project_name, toml_info)
 
     # TODO: generate distribution archives: https://packaging.python.org/en/latest/tutorials/packaging-projects/#generating-distribution-archives
 
@@ -193,7 +214,7 @@ def packhackmain(project_name=None,
     with open(os.path.join(output_directory, "pyproject.toml"), 'w') as tom_stream:
         tom_stream.write(tomlkit.dumps(pyproject))
     with open(os.path.join(output_directory, "setup.py"), 'w') as setup_stream:
-        setup_stream.write("".join(setup))
+        setup_stream.write("".join(setup_info))
 
     if not dummy:
         # TODO: call this directly in python
